@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PA4 – A-Frame – 241487</title>
+  <!-- Task A: A-Frame 1.8.0 first, then my components (before <a-scene>) -->
+  <script src="https://aframe.io/releases/1.8.0/aframe.min.js"></script>
+  <script src="components.js"></script>
+</head>
+<body>
+  <!-- Task A: fog on <a-scene>. `stats` shows fps / draw calls / triangles for testing. -->
+  <a-scene fog="type: linear; color: #d5e3ee; near: 6; far: 42" stats>
+
+    <!-- Task A: three preloaded image textures (+ one normal map). Credits: README.md -->
+    <a-assets>
+      <img id="snow" src="textures/snow.jpg" alt="Snow with dry grass specks">
+      <img id="snow-normal" src="textures/snow_normal.jpg" alt="Snow normal map">
+      <img id="ice" src="textures/ice.jpg" alt="Frosted ice">
+      <img id="wood" src="textures/wood.jpg" alt="Wooden planks">
+    </a-assets>
+
+    <!-- ===== Environment: sky, lights, ground (Task A) ===== -->
+    <a-sky color="#bcd4e6"></a-sky>
+    <a-entity light="type: ambient; color: #dbe7f2; intensity: 2.2"></a-entity>
+    <a-entity light="type: directional; color: #fff3dc; intensity: 2.2" position="-2 4 3"></a-entity>
+
+    <!-- Task C: x1487-texture on three entities. The ground repeats 16 x 16. -->
+    <a-entity id="ground"
+              geometry="primitive: plane; width: 80; height: 80"
+              rotation="-90 0 0"
+              material="color: #ffffff"
+              x1487-texture="src: #snow; normalSrc: #snow-normal; repeat: 16 16"></a-entity>
+    <a-entity id="ice-path"
+              geometry="primitive: plane; width: 3.2; height: 11"
+              rotation="-90 0 0" position="0 0.02 -5.5"
+              material="color: #ffffff"
+              x1487-texture="src: #ice; repeat: 1 4"></a-entity>
+    <a-entity id="end-wall"
+              geometry="primitive: box; width: 9; height: 4; depth: 0.3"
+              position="0 2 -11.1"
+              material="color: #ffffff"
+              x1487-texture="src: #wood; repeat: 3 1"></a-entity>
+
+    <!-- Low snow dunes: the winter steppe horizon -->
+    <a-entity geometry="primitive: sphere; radius: 6" scale="1 0.22 1" position="-10 0 -3"
+              material="color: #f2f7fb; roughness: 1"></a-entity>
+    <a-entity geometry="primitive: sphere; radius: 7" scale="1 0.2 1" position="11 0 -8"
+              material="color: #eef4f9; roughness: 1"></a-entity>
+    <a-entity geometry="primitive: sphere; radius: 8" scale="1 0.18 1" position="-13 0 -16"
+              material="color: #f2f7fb; roughness: 1"></a-entity>
+    <a-entity geometry="primitive: sphere; radius: 8" scale="1 0.18 1" position="14 0 -20"
+              material="color: #eef4f9; roughness: 1"></a-entity>
+
+    <!-- ===== Camera rig at 1.6 m (Task A) + gaze interaction (Task D) ===== -->
+    <a-entity id="rig" wasd-controls="acceleration: 30" position="0 0 0">
+      <a-entity camera look-controls position="0 1.6 0">
+        <!-- Gaze variant: fuse cursor (1.5 s) with a visible ring. The raycaster only sees .exhibit. -->
+        <a-entity cursor="fuse: true; fuseTimeout: 1500"
+                  raycaster="objects: .exhibit; far: 20"
+                  position="0 0 -1"
+                  geometry="primitive: ring; radiusInner: 0.015; radiusOuter: 0.024"
+                  material="color: #ff5722; shader: flat"
+                  animation__fuse="property: scale; from: 1 1 1; to: 0.3 0.3 0.3; startEvents: fusing; pauseEvents: mouseleave, click; easing: linear; dur: 1500"
+                  animation__reset="property: scale; to: 1 1 1; startEvents: mouseleave, click; dur: 150"></a-entity>
+      </a-entity>
+    </a-entity>
+
+    <!-- ===== Six exhibits: corridor layout (two rows of 3, rows 3 m apart, spread over 10 m) ===== -->
+    <!-- Each has class="exhibit", a name, x1487-motion (pulse, different phase) and x1487-exhibit. -->
+    <!-- Left row, x = -1.5 -->
+    <a-entity class="exhibit" position="-1.5 0 -2"
+              geometry="primitive: sphere; radius: 0.9; thetaLength: 90; segmentsWidth: 24; segmentsHeight: 12"
+              material="color: #efe7d2; roughness: 0.9; side: double"
+              x1487-motion="phase: 0; amplitude: 0.15; period: 3"
+              x1487-exhibit="name: Yurt; info: Felt-covered round tent of the nomads, warm even in deep winter."></a-entity>
+    <a-entity class="exhibit" position="-1.5 1.2 -5"
+              geometry="primitive: cone; radiusBottom: 0.8; radiusTop: 0; height: 2.4"
+              material="color: #2f5d46; roughness: 0.9"
+              x1487-motion="phase: 1.05; amplitude: 0.15; period: 3"
+              x1487-exhibit="name: Snowy spruce; info: An evergreen that stays green under heavy snow."></a-entity>
+    <a-entity class="exhibit" position="-1.5 0.06 -8"
+              geometry="primitive: cylinder; radius: 1; height: 0.12"
+              material="color: #8fcbea; roughness: 0.15; metalness: 0.2"
+              x1487-motion="phase: 2.1; amplitude: 0.15; period: 3"
+              x1487-exhibit="name: Frozen pond; info: Steppe lakes freeze solid for months each winter."></a-entity>
+
+    <!-- Right row, x = +1.5 -->
+    <a-entity class="exhibit" position="1.5 0.45 -2"
+              geometry="primitive: dodecahedron; radius: 0.45"
+              material="color: #ff8a3d; emissive: #ff6a00; emissiveIntensity: 0.6; roughness: 0.6"
+              x1487-motion="phase: 3.15; amplitude: 0.15; period: 3"
+              x1487-exhibit="name: Campfire; info: The warm heart of a winter camp on the open steppe."></a-entity>
+    <a-entity class="exhibit" position="1.5 0.9 -5"
+              geometry="primitive: box; width: 0.5; height: 1.8; depth: 0.4"
+              material="color: #8d9299; roughness: 1"
+              x1487-motion="phase: 4.2; amplitude: 0.15; period: 3"
+              x1487-exhibit="name: Balbal stone; info: Stone figure that Turkic nomads raised as a grave marker."></a-entity>
+    <a-entity class="exhibit" position="1.5 1.1 -8"
+              geometry="primitive: octahedron; radius: 0.7"
+              material="color: #9fd8ff; roughness: 0.1; metalness: 0.3"
+              x1487-motion="phase: 5.25; amplitude: 0.15; period: 3"
+              x1487-exhibit="name: Frost crystal; info: Hoarfrost grows where moist air meets frozen ground."></a-entity>
+
+    <!-- ===== Panel: student ID, variant and live "Selected" counter (Tasks A and E) ===== -->
+    <a-entity id="info-board" position="0 2.1 -10.9">
+      <a-entity geometry="primitive: plane; width: 8; height: 2.7"
+                material="color: #10202e; shader: flat"></a-entity>
+      <a-entity text="value: PA4 - A-Frame VR Scene - Student ID 241487; align: center; width: 7.6; color: #ffd54f"
+                position="0 0.85 0.02"></a-entity>
+      <a-entity text="value: Variant x1487-  Winter steppe | pulse | gaze 1.5 s | corridor; align: center; width: 7.6; color: #ffffff"
+                position="0 0.35 0.02"></a-entity>
+      <a-entity id="gallery-status"
+                text="value: Selected: none (0 of 6); align: center; width: 7; color: #7fdcff"
+                position="0 -0.3 0.02"></a-entity>
+      <a-entity text="value: Gaze at an exhibit for 1.5 s to select it. M = pause / resume motion, X = remove selected.; align: center; width: 7; color: #b0bec5; wrapCount: 60"
+                position="0 -0.95 0.02"></a-entity>
+    </a-entity>
+
+  </a-scene>
+</body>
+</html>
