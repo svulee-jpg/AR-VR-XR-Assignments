@@ -76,6 +76,8 @@ no image files and no licence issues. Texture tiles have real-world sizes (a bri
 | `?debug` in the URL | Shows the frame rate and a button to download the event log (CSV) |
 | `#v=...` in the URL | Restores a shared variant |
 | Top bar: Get quote | Printable offer with a picture of the room, item table, total, mortgage (Print / Save as PDF, copy link) |
+| Left drawer "Choose your finishes" (desktop) | Surface tabs, material cards with a texture sample and the price per m², colour swatches. It changes the same state as the 3D panel. On a desktop screen it replaces the floating 3D panel; in a headset (or when the drawer is hidden) the 3D panel is shown |
+| Top bar: Before / after | Full-screen wipe between the rough apartment and your variant (drag the divider or use the slider) |
 | Top bar: Furniture on/off | Shows the room furnished (scale and mood); hidden in the "before renovation" view |
 | Top bar: Book consultation | Request form (name, contact, day, time); registers a demo reference number, nothing is sent |
 | Landing page: design packages | Pick a ready-made design with its price before entering the room |
@@ -108,6 +110,7 @@ no image files and no licence issues. Texture tiles have real-world sizes (a bri
 | Comfort | No camera motion is ever forced; everything is reachable from a stationary position |
 | Pinned versions, one-command run | Sections above, `package.json` |
 | Product feel (landing, live price, quote, booking) | `index.html` (`#intro`, `#topbar`, `#quote`, `#booking`), `css/shop.css`, `js/shop.js` |
+| Shop-style pickers and before/after wipe | `#drawer` and `#cmp` in `index.html`, `js/drawer.js`, `js/compare.js`, `css/shop.css` |
 | Door as a sixth finishable surface | `door` in `js/catalog.js`, door textures in `js/textures.js`, `surface="name: door"` in `index.html` |
 
 ## Frame rate
@@ -136,7 +139,9 @@ No AI-generated images. No third-party models or textures.
 ```
 index.html            page, room, landing, top bar, quote and booking dialogs, HUD
 css/shop.css          styles of the landing page, top bar, quote sheet (incl. A4 print) and booking form
-js/shop.js            company layer: design packages, live total, quote with room picture, booking form
+js/shop.js            company layer: design packages, live total, quote with room picture, booking form, furniture toggle
+js/drawer.js          HTML finishes drawer (material cards with samples and prices)
+js/compare.js         before / after wipe
 js/catalog.js         materials, colours, designs, demo prices, variant code (testable without a browser)
 js/textures.js        procedural seamless textures and bump maps
 js/commands.js        voice-command parser (testable without a browser)

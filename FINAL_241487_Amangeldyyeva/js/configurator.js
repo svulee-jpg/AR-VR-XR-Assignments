@@ -303,6 +303,7 @@
       this.log('select_surface', source, surface);
       this.updateHighlights();
       this.renderPanel();
+      this.el.emit('surface-selected');
       var msg = 'Selected: ' + K.SURFACE_LABEL[surface].toLowerCase();
       if (source !== 'voice') this.setCaption(msg, 'info');
       return msg;

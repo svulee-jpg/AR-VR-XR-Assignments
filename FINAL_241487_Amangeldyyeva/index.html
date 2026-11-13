@@ -18,6 +18,8 @@
   <script src="js/app.js"></script>
   <script src="js/configurator.js"></script>
   <script src="js/shop.js"></script>
+  <script src="js/drawer.js"></script>
+  <script src="js/compare.js"></script>
 
   <style>
     html, body { margin: 0; height: 100%; background: #15171c; font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
@@ -107,8 +109,29 @@
     <div class="spacer"></div>
     <div class="total"><small>Your finishing total</small><strong id="tb-total">not chosen yet</strong></div>
     <button id="tb-furniture" class="btn" type="button" aria-pressed="false">Furniture: off</button>
+    <button id="tb-compare" class="btn" type="button">Before / after</button>
     <button id="tb-quote" class="btn" type="button">Get quote</button>
     <button id="tb-book" class="btn primary" type="button">Book consultation</button>
+  </div>
+
+  <!-- Finishes drawer: HTML pickers with material samples and prices (desktop) -->
+  <aside id="drawer" aria-label="Finishes">
+    <div class="dr-head"><b>Choose your finishes</b><button id="dr-toggle" class="btn" type="button">◂ Hide</button></div>
+    <div id="drawer-body"></div>
+  </aside>
+
+  <!-- Before / after wipe -->
+  <div id="cmp" role="dialog" aria-label="Before and after">
+    <div id="cmp-stage">
+      <img id="cmp-after" alt="After: your variant">
+      <div id="cmp-before-wrap"><img id="cmp-before" alt="Before: rough apartment"></div>
+      <div id="cmp-handle"><span>◂ ▸</span></div>
+      <div class="cmp-tag l">Before</div><div class="cmp-tag r">After: your variant</div>
+    </div>
+    <div class="cmp-bar">
+      <input id="cmp-range" type="range" min="0" max="100" value="50" aria-label="Before and after divider">
+      <button id="cmp-close" class="btn primary" type="button">Back to the room</button>
+    </div>
   </div>
 
   <!-- Quote: printable commercial offer -->
