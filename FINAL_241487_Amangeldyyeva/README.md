@@ -7,7 +7,7 @@ Student: Saule Amangeldyyeva, ID 241487 (solo project; owner of all modules).
 
 A developer sells apartments in a raw state ("rough finish"). Instead of making buyers look for builders,
 the developer offers a finishing package: the buyer stands in the bare room in VR, picks a **ready-made
-design** or builds their own (walls, accent wall, floor, ceiling, skirting board), sees the room change
+design** or builds their own (walls, accent wall, floor, ceiling, skirting board, interior door), sees the room change
 at once, and gets a **cost estimate and a monthly mortgage payment** for the finishing.
 The buyer can choose by gaze, mouse or controller, or **by voice in English**, for example
 **"red brick walls"** or **"dark walnut herringbone floor"**.
@@ -15,7 +15,7 @@ The buyer can choose by gaze, mouse or controller, or **by voice in English**, f
 This is an independent student concept for a **fictional developer**. Real developers already offer
 turnkey finishing to buyers (for example the "Smart Remont" service of BI Group in Kazakhstan); this
 project is not affiliated with any company, uses no company branding, and all **prices are made up
-(demo prices in tenge)**.
+(demo prices in tenge)**. The fictional brand in the demo is **"Aurora Homes"** (project "Aurora Residence").
 
 ## Target device and how to run
 
@@ -52,6 +52,7 @@ No API keys, no server, no build step.
 | Floor | laminate, parquet board, herringbone parquet, engineered board, vinyl (SPC), porcelain tile, marble, poured concrete, carpet | 12 wood tones, 12 stone, 10 marble, 6 concrete, 12 carpet |
 | Ceiling | painted, stretch matt, stretch gloss | 8 colours |
 | Skirting board | PVC, painted MDF, wood, hidden aluminium (different heights) | 8 colours |
+| Interior door | painted panel door, wood veneer, solid wood (panelled), steel entrance door | 24 enamel colours, 12 wood tones, 7 solid-wood tones, 6 steel colours |
 
 The surface options multiply to **3 599 769 600 different variants** (shown on the intro page and the summary).
 Six **ready-made designs** (Scandinavian, Loft, Classic, Minimal, Cosy, Dark luxe) apply a whole room in one step.
@@ -74,6 +75,9 @@ no image files and no licence issues. Texture tiles have real-world sizes (a bri
 | (automatic) | The configurator panel glides to stay in front of you when you turn or walk away |
 | `?debug` in the URL | Shows the frame rate and a button to download the event log (CSV) |
 | `#v=...` in the URL | Restores a shared variant |
+| Top bar: Get quote | Printable offer with a picture of the room, item table, total, mortgage (Print / Save as PDF, copy link) |
+| Top bar: Book consultation | Request form (name, contact, day, time); registers a demo reference number, nothing is sent |
+| Landing page: design packages | Pick a ready-made design with its price before entering the room |
 
 ### Voice commands (English, Chrome)
 
@@ -84,6 +88,7 @@ no image files and no licence issues. Texture tiles have real-world sizes (a bri
 | "walls light grey and floor dark oak" | Two surfaces in one phrase |
 | "accent wall striped blue wallpaper", "no accent" | Accent wall on / off |
 | "ceiling glossy white", "skirting black", "wooden slats" | Ceiling, skirting board, a material alone names its surface |
+| "steel door black", "wooden door walnut", "panelled door walnut", "door white" | Interior door (veneer / solid / steel / painted) |
 | "dark" (with a surface selected) | Changes only the colour and keeps the material |
 | "loft design", "scandinavian", "cosy", "classic", "minimal", "luxe" | Ready-made designs |
 | "random", "show before", "show after", "evening", "day" | Tools |
@@ -101,6 +106,8 @@ no image files and no licence issues. Texture tiles have real-world sizes (a bri
 | Every message is text, colour is never the only cue | `canvas-text` captions, ✓ marks, hover border, colour names on hover |
 | Comfort | No camera motion is ever forced; everything is reachable from a stationary position |
 | Pinned versions, one-command run | Sections above, `package.json` |
+| Product feel (landing, live price, quote, booking) | `index.html` (`#intro`, `#topbar`, `#quote`, `#booking`), `css/shop.css`, `js/shop.js` |
+| Door as a sixth finishable surface | `door` in `js/catalog.js`, door textures in `js/textures.js`, `surface="name: door"` in `index.html` |
 
 ## Frame rate
 
@@ -125,12 +132,14 @@ No AI-generated images. No third-party models or textures.
 ## Files
 
 ```
-index.html            page, room, intro, HUD
+index.html            page, room, landing, top bar, quote and booking dialogs, HUD
+css/shop.css          styles of the landing page, top bar, quote sheet (incl. A4 print) and booking form
+js/shop.js            company layer: design packages, live total, quote with room picture, booking form
 js/catalog.js         materials, colours, designs, demo prices, variant code (testable without a browser)
 js/textures.js        procedural seamless textures and bump maps
 js/commands.js        voice-command parser (testable without a browser)
 js/voice.js           Web Speech API wrapper with status handling
-js/app.js             small A-Frame components (canvas-text, room-bounds, radiator, fps-meter)
+js/app.js             small A-Frame components (canvas-text, rig-move, panel-follow, radiator, fps-meter)
 js/configurator.js    surfaces, panel, price, state machine, voice wiring
 models/fan.glb        animated ceiling fan
 tools/make_fan.py     generator of the fan model

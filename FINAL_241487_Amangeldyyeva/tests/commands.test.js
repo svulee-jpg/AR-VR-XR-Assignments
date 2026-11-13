@@ -68,6 +68,12 @@ check('wallpaper', ['set:walls:wp-plain:white']);
 check('textured paint sand', ['set:walls:textured:sand']);
 check('walls plaster cream', ['set:walls:plaster:cream']);
 
+// ---- Door ---------------------------------------------------------------------
+check('steel door black', ['set:door:door-steel:black']);
+check('wooden door walnut', ['set:door:door-veneer:walnut']);
+check('panelled door walnut', ['set:door:door-solid:walnut']);
+check('door white', ['set:door:door-paint:white']);
+
 // ---- Ceiling, skirting, accent wall ---------------------------------------------
 check('ceiling glossy white', ['set:ceiling:gloss:white']);
 check('ceiling matt grey', ['set:ceiling:matt:grey']);
@@ -171,8 +177,9 @@ for (let i = 0; i < 200; i++) {
 }
 passed++;
 assert.strictEqual(Catalog.decode('garbage'), null);
-assert.strictEqual(Catalog.decode('9.9-x-x-x-x'), null);
-passed += 2;
+assert.strictEqual(Catalog.decode('9.9-x-x-x-x'), null);   // old 5-part codes are no longer valid
+assert.strictEqual(Catalog.SURFACES.length, 6);
+passed += 3;
 // Product goal: at least 50 000 variants.
 assert.ok(Catalog.countVariants() >= 50000, 'fewer than 50 000 variants');
 passed++;
@@ -182,6 +189,9 @@ const onlyWalls = Catalog.emptyChoice();
 onlyWalls.walls = { m: 'paint', c: 'white' };
 const wallsPrice = Math.round(2800 * Catalog.AREAS.walls) + Math.round(2800 * Catalog.AREAS.accent);
 assert.strictEqual(Catalog.price(onlyWalls).total, wallsPrice);
-passed += 2;
+const withDoor = Catalog.emptyChoice();
+withDoor.door = { m: 'door-solid', c: 'oak' };
+assert.strictEqual(Catalog.price(withDoor).total, Math.round(38000 * Catalog.AREAS.door));
+passed += 3;
 
 console.log(`OK: ${passed} checks passed; ${Catalog.fmt(Catalog.countVariants())} variants in the catalogue`);

@@ -258,6 +258,7 @@
       if (this.state.mode !== 'intro') return;
       this.log('session_start', useVoice ? 'voice' : 'buttons', '');
       this.setMode('room');
+      this.el.emit('session-started');
       this.setCaption('Pick a design or build your own. Drag the mouse to look around, W A S D to walk. The panel follows you.', 'info', 9000);
     },
 
@@ -265,6 +266,7 @@
       this.state.mode = mode;
       this.log('mode', '', mode);
       this.renderPanel();
+      this.el.emit('mode-changed', { mode: mode });
     },
 
     // ---- helpers ----
@@ -289,6 +291,7 @@
       this.applyAll();
       this.updateHighlights();
       this.renderPanel();
+      this.el.emit('choice-changed');
       try { history.replaceState(null, '', '#v=' + K.encode(this.state.choice)); } catch (e) { /* file:// */ }
     },
 

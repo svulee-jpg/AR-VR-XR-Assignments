@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Apartment finishing configurator: VR demo</title>
+  <title>Aurora Homes: choose your apartment finish in VR (demo)</title>
 
   <!-- Pinned versions (see README). -->
   <script src="https://aframe.io/releases/1.8.0/aframe.min.js"></script>
@@ -17,6 +17,7 @@
   <script src="js/voice.js"></script>
   <script src="js/app.js"></script>
   <script src="js/configurator.js"></script>
+  <script src="js/shop.js"></script>
 
   <style>
     html, body { margin: 0; height: 100%; background: #15171c; font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
@@ -47,33 +48,123 @@
     #debugbar[hidden] { display: none; }
     #debugbar button { font: inherit; padding: 3px 8px; }
   </style>
+  <link rel="stylesheet" href="css/shop.css">
 </head>
 <body>
 
   <div id="intro">
-    <div class="card">
-      <h1>Choose your apartment's finish in VR</h1>
-      <p class="sub">Demo project: how a developer could show buyers their finishing options before any renovation starts. The apartment is still raw. Choose what it will become.</p>
-
-      <h2>How it works</h2>
-      <ul>
-        <li>Pick a ready-made design (Scandinavian, Loft, Classic and more) or build your own: walls, accent wall, floor, ceiling, skirting board and door.</li>
-        <li>Every surface has materials (paint, brick, microcement, herringbone parquet, porcelain tile...) and dozens of colours. In total there are <strong id="variant-count">…</strong> combinations.</li>
-        <li>Look at a wall or the floor for a second and it gets selected in VR. You can also click with the mouse or say, for example: "red brick walls", "dark walnut herringbone floor", "loft design".</li>
-        <li>Walk around and look in every direction: drag the mouse to look 360°, W A S D or the arrow keys to walk, Q / E to turn. In a headset: left stick walks, right stick turns. The panel follows you.</li>
-        <li>The "Done" button shows the total cost, the monthly mortgage payment and a variant code you can share.</li>
-      </ul>
-
-      <div class="perm">
-        <strong>What you need to allow: the microphone (optional).</strong><br>
-        It is only used to change the finishes with your voice (English). While recognition is on, Chrome sends the audio to Google's speech recognition service. This app does not record or store audio and does not save any personal data. The camera and location are not used.
+    <div class="landing">
+      <div class="brandbar">
+        <div class="logo"><span class="logo-mark"></span>Aurora Homes</div>
+        <div class="tag">Aurora Residence, Block B · Apartment 128 · fictional demo developer</div>
       </div>
 
-      <div class="buttons">
-        <button id="btn-voice" class="big" type="button">Start with voice</button>
-        <button id="btn-novoice" class="big" type="button">Start without voice</button>
+      <div class="hero">
+        <div class="card">
+          <h1>Walk into your apartment before it is finished</h1>
+          <p class="sub">Choose the walls, floor, ceiling, skirting board and door in virtual reality. See the price change with every click, get a printable offer and book a meeting with a finishing manager.</p>
+          <div class="facts">
+            <div class="fact"><b id="variant-count">…</b><span>possible combinations</span></div>
+            <div class="fact"><b>6</b><span>ready-made designs</span></div>
+            <div class="fact"><b>6</b><span>surfaces to finish</span></div>
+          </div>
+        </div>
+        <ol class="steps">
+          <li><b>Choose</b>Pick a ready-made design or build your own, with the mouse, by gaze, in a headset or with your voice.</li>
+          <li><b>Check the price</b>The total and the monthly mortgage payment update live while you choose.</li>
+          <li><b>Get your offer</b>Open a printable quote with a picture of your room, or share a link to your variant.</li>
+          <li><b>Book a consultation</b>Leave a request and a manager confirms the details. Nothing is built until you decide.</li>
+        </ol>
       </div>
-      <p class="small">Student demo project of a fictional developer. Prices are made up and are not an offer. Works best in desktop Chrome (voice) and in VR mode (headset button at the bottom right). If the microphone is not allowed or does not work, everything is still available by gaze and buttons. Controls: mouse drag (look), W A S D / arrows (walk), Q / E (turn).</p>
+
+      <h2 class="section-title">Start from a design package</h2>
+      <p class="section-sub" id="pkg-hint">Or skip this and start from the raw apartment.</p>
+      <div class="packages" id="packages"></div>
+
+      <div class="cta">
+        <div class="perm">
+          <strong>What you need to allow: the microphone (optional).</strong><br>
+          It is only used to change the finishes with your voice (English). While recognition is on, Chrome sends the audio to Google's speech recognition service. This app does not record or store audio and does not save any personal data. The camera and location are not used.
+        </div>
+        <div class="buttons">
+          <button id="btn-voice" class="big" type="button">Start with voice</button>
+          <button id="btn-novoice" class="big" type="button">Start without voice</button>
+        </div>
+      </div>
+
+      <div class="trust">
+        <div><b>Look around freely</b>Drag the mouse to look 360°, W A S D or arrows to walk, Q / E to turn. In a headset: left stick walks, right stick turns.</div>
+        <div><b>Say it or click it</b>For example: "red brick walls", "walnut veneer door", "loft design". Every function also works without a microphone.</div>
+        <div><b>Honest demo</b>Aurora Homes is a fictional developer made for a university project. Prices are made up and are not an offer. No personal data is sent or stored.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top bar: brand, live total, quote and booking (shown after the start) -->
+  <div id="topbar">
+    <div class="logo"><span class="logo-mark"></span>Aurora Homes</div>
+    <div class="where">Aurora Residence · Apartment 128</div>
+    <div class="spacer"></div>
+    <div class="total"><small>Your finishing total</small><strong id="tb-total">not chosen yet</strong></div>
+    <button id="tb-quote" class="btn" type="button">Get quote</button>
+    <button id="tb-book" class="btn primary" type="button">Book consultation</button>
+  </div>
+
+  <!-- Quote: printable commercial offer -->
+  <div id="quote" class="modal" role="dialog" aria-label="Quote">
+    <div class="sheet">
+      <div class="head">
+        <div>
+          <div class="logo"><span class="logo-mark"></span>Aurora Homes</div>
+          <h2>Finishing offer</h2>
+          <div id="q-apt" style="font-size:13px;color:#4a5160;margin-top:4px"></div>
+        </div>
+        <div class="meta">Offer no. <b id="q-ref"></b><br><span id="q-date"></span><br>Valid for 14 days (demo)</div>
+      </div>
+      <img id="q-shot" class="shot hidden" alt="Your room with the chosen finishes">
+      <table>
+        <thead><tr><th>Surface</th><th>Finish and colour</th><th class="num">Quantity</th><th class="num">Price</th></tr></thead>
+        <tbody id="q-rows"></tbody>
+        <tfoot><tr class="tot"><td colspan="3">Total</td><td class="num" id="q-total"></td></tr></tfoot>
+      </table>
+      <p class="note" id="q-mortgage"></p>
+      <p class="note">Variant code: <b id="q-code"></b>. Open the same variant with the shared link. This is a demo of a fictional developer: prices are made up and the document is not a legal offer.</p>
+      <div class="actions">
+        <button id="q-print" class="btn primary" type="button">Print or save as PDF</button>
+        <button id="q-copy" class="btn" type="button">Copy link</button>
+        <button id="q-book" class="btn" type="button">Book consultation</button>
+        <button class="btn" type="button" data-close>Back to the room</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Booking: consultation request (demo, nothing is sent) -->
+  <div id="booking" class="modal" role="dialog" aria-label="Book a consultation">
+    <div class="sheet" style="max-width:560px">
+      <div class="head"><div><div class="logo"><span class="logo-mark"></span>Aurora Homes</div><h2>Book a consultation</h2></div></div>
+      <form id="b-form" novalidate>
+        <p style="margin:0;font-size:14px;color:#4a5160">A finishing manager will go through your choice (total <b id="b-total"></b>) and confirm dates and terms.</p>
+        <label for="b-name">Your name</label>
+        <input id="b-name" type="text" autocomplete="off" placeholder="For example: Aigerim">
+        <label for="b-contact">Phone or e-mail</label>
+        <input id="b-contact" type="text" autocomplete="off" placeholder="+7 ... or name@example.com">
+        <div class="row2">
+          <div><label for="b-date">Day</label><select id="b-date"></select></div>
+          <div><label for="b-time">Time</label>
+            <select id="b-time"><option>10:00</option><option>12:00</option><option>15:00</option><option>17:00</option></select></div>
+        </div>
+        <label for="b-note">Comment (optional)</label>
+        <textarea id="b-note" rows="2"></textarea>
+        <label class="check"><input id="b-consent" type="checkbox"> I understand this is a university demo: my details are not sent or stored anywhere.</label>
+        <div class="err" id="b-err" role="alert"></div>
+        <div class="actions"><button class="btn primary" type="submit">Send request</button><button class="btn" type="button" data-close>Cancel</button></div>
+      </form>
+      <div id="b-done" class="done hidden">
+        <div>Request registered (demo), <span id="b-who"></span>.</div>
+        <div class="ref" id="b-ref"></div>
+        <div>Requested time: <b id="b-when"></b>. In a real project the manager would confirm by phone within one working day.</div>
+        <div class="actions"><button class="btn primary" type="button" data-close>Back to the room</button></div>
+      </div>
     </div>
   </div>
 
