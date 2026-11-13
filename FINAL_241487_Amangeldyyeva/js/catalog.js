@@ -127,18 +127,25 @@
     concrete: pick(['milk', 'grey-l', 'grey', 'grey-d', 'graphite', 'beige']),
     carpet: pick(['grey-l', 'grey', 'grey-d', 'graphite', 'beige', 'sand', 'brown', 'blue', 'green', 'burgundy', 'terracotta', 'olive']),
     ceiling: pick(['white', 'milk', 'cream', 'grey-l', 'grey', 'graphite', 'skyblue-l', 'black']),
-    skirting: pick(['white', 'milk', 'grey-l', 'grey', 'graphite', 'black', 'oak', 'wenge'])
+    skirting: pick(['white', 'milk', 'grey-l', 'grey', 'graphite', 'black', 'oak', 'wenge']),
+    doorpaint: pick([
+      'white', 'milk', 'cream', 'beige', 'sand', 'grey-l', 'grey', 'grey-d', 'graphite', 'black',
+      'skyblue-d', 'blue-d', 'turq-d', 'green-d', 'sage', 'olive', 'emerald', 'mustard',
+      'terracotta', 'red-d', 'burgundy', 'lilac-d', 'pink-l', 'brown'
+    ]),
+    doorwood: pick(['light-oak', 'oak', 'golden-oak', 'walnut', 'dark-walnut', 'wenge', 'mahogany']),
+    doorsteel: pick(['white', 'grey', 'grey-d', 'graphite', 'black', 'brown'])
   };
 
   // ---------------------------------------------------------------------------
   // 2. Surfaces and materials
   // ---------------------------------------------------------------------------
-  var SURFACES = ['walls', 'accent', 'floor', 'ceiling', 'skirting'];
+  var SURFACES = ['walls', 'accent', 'floor', 'ceiling', 'skirting', 'door'];
   var SURFACE_LABEL = {
-    walls: 'Walls', accent: 'Accent wall', floor: 'Floor', ceiling: 'Ceiling', skirting: 'Skirting board'
+    walls: 'Walls', accent: 'Accent wall', floor: 'Floor', ceiling: 'Ceiling', skirting: 'Skirting board', door: 'Interior door'
   };
   var SURFACE_TAB = {
-    walls: 'Walls', accent: 'Accent', floor: 'Floor', ceiling: 'Ceiling', skirting: 'Skirting'
+    walls: 'Walls', accent: 'Accent', floor: 'Floor', ceiling: 'Ceiling', skirting: 'Skirting', door: 'Door'
   };
 
   // price = demo ₸ per m² (per metre for the skirting board); rough/metal = surface look.
@@ -177,11 +184,18 @@
       { key: 'mdf', label: 'Painted MDF (10 cm)', price: 1800, palette: 'skirting', rough: 0.55, metal: 0, height: 0.1 },
       { key: 'wood', label: 'Wood (12 cm)', price: 2800, palette: 'skirting', rough: 0.5, metal: 0, height: 0.12 },
       { key: 'alu', label: 'Hidden aluminium (4 cm)', price: 3600, palette: 'skirting', rough: 0.35, metal: 0.4, height: 0.04 }
+    ],
+    // price = demo ₸ per m² of the door leaf (the door is 0.9 x 2.1 m = 1.89 m²)
+    door: [
+      { key: 'door-paint', label: 'Painted panel door', price: 14000, palette: 'doorpaint', rough: 0.45, metal: 0 },
+      { key: 'door-veneer', label: 'Wood veneer door', price: 22000, palette: 'wood', rough: 0.5, metal: 0 },
+      { key: 'door-solid', label: 'Solid wood, panelled', price: 38000, palette: 'doorwood', rough: 0.5, metal: 0 },
+      { key: 'door-steel', label: 'Steel entrance door', price: 31000, palette: 'doorsteel', rough: 0.4, metal: 0.55 }
     ]
   };
 
   // Used when the user names only a colour for a surface that has no material yet.
-  var DEFAULT_MATERIAL = { walls: 'paint', accent: 'paint', floor: 'laminate', ceiling: 'matt', skirting: 'mdf' };
+  var DEFAULT_MATERIAL = { walls: 'paint', accent: 'paint', floor: 'laminate', ceiling: 'matt', skirting: 'mdf', door: 'door-paint' };
 
   // What the apartment looks like before finishing (developer's rough state).
   var RAW = {
@@ -189,7 +203,8 @@
     accent: { label: 'Rough finish', hex: '#9b9a96', tex: 'microcement' },
     floor: { label: 'Concrete screed', hex: '#77746f', tex: 'concrete' },
     ceiling: { label: 'Concrete slab', hex: '#c4c3bf', tex: null },
-    skirting: { label: 'No skirting board', hex: '#cccccc', tex: null, hidden: true }
+    skirting: { label: 'No skirting board', hex: '#cccccc', tex: null, hidden: true },
+    door: { label: 'Temporary construction door', hex: '#7a5230', tex: null }
   };
 
   // Room geometry (metres) used for the price. Room 5 x 4 x 2.7 m, one window, one door.
@@ -197,8 +212,9 @@
   //   accent wall = far wall 5*2.7 = 13.5 minus the window = 12.18
   //   walls       = all walls minus window, door and accent wall
   //   skirting    = perimeter 18 minus the door 0.9 = 17.1 m
-  var AREAS = { walls: 33.21, accent: 12.18, floor: 20, ceiling: 20, skirting: 17.1 };
-  var UNITS = { walls: 'm²', accent: 'm²', floor: 'm²', ceiling: 'm²', skirting: 'm' };
+  //   door        = leaf 0.9 x 2.1 = 1.89 m2
+  var AREAS = { walls: 33.21, accent: 12.18, floor: 20, ceiling: 20, skirting: 17.1, door: 1.89 };
+  var UNITS = { walls: 'm²', accent: 'm²', floor: 'm²', ceiling: 'm²', skirting: 'm', door: 'm²' };
 
   // ---------------------------------------------------------------------------
   // 3. Ready-made designs ("choose a finished design, we do the rest")
@@ -206,22 +222,28 @@
   var PRESETS = [
     { key: 'scandi', label: 'Scandinavian',
       walls: ['paint', 'white'], accent: ['slats', 'light-oak'], floor: ['laminate', 'bleached-oak'],
-      ceiling: ['matt', 'white'], skirting: ['mdf', 'white'] },
+      ceiling: ['matt', 'white'], skirting: ['mdf', 'white'],
+      door: ['door-paint', 'white'] },
     { key: 'loft', label: 'Loft',
       walls: ['microcement', 'grey-l'], accent: ['brick', 'brk-red'], floor: ['concrete', 'grey'],
-      ceiling: ['matt', 'graphite'], skirting: ['pvc', 'black'] },
+      ceiling: ['matt', 'graphite'], skirting: ['pvc', 'black'],
+      door: ['door-steel', 'black'] },
     { key: 'classic', label: 'Classic',
       walls: ['plaster', 'cream'], accent: ['wp-stripe', 'beige'], floor: ['herringbone', 'oak'],
-      ceiling: ['matt', 'milk'], skirting: ['wood', 'white'] },
+      ceiling: ['matt', 'milk'], skirting: ['wood', 'white'],
+      door: ['door-solid', 'oak'] },
     { key: 'minimal', label: 'Minimal',
       walls: ['paint', 'grey-l'], accent: null, floor: ['spc', 'ash-grey'],
-      ceiling: ['matt', 'white'], skirting: ['alu', 'white'] },
+      ceiling: ['matt', 'white'], skirting: ['alu', 'white'],
+      door: ['door-paint', 'grey-l'] },
     { key: 'cosy', label: 'Cosy',
       walls: ['textured', 'sand'], accent: ['slats', 'walnut'], floor: ['engineered', 'golden-oak'],
-      ceiling: ['matt', 'cream'], skirting: ['wood', 'oak'] },
+      ceiling: ['matt', 'cream'], skirting: ['wood', 'oak'],
+      door: ['door-veneer', 'walnut'] },
     { key: 'luxe', label: 'Dark luxe',
       walls: ['paint', 'graphite'], accent: ['plaster', 'grey-d'], floor: ['marble', 'black'],
-      ceiling: ['gloss', 'graphite'], skirting: ['mdf', 'black'] }
+      ceiling: ['gloss', 'graphite'], skirting: ['mdf', 'black'],
+      door: ['door-paint', 'graphite'] }
   ];
 
   // ---------------------------------------------------------------------------
@@ -257,7 +279,7 @@
   }
 
   function emptyChoice() {
-    return { walls: null, accent: null, floor: null, ceiling: null, skirting: null };
+    return { walls: null, accent: null, floor: null, ceiling: null, skirting: null, door: null };
   }
 
   /** Builds the choice object of a ready-made design. */

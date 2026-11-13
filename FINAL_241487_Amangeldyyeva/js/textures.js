@@ -403,6 +403,70 @@
   // ---------------------------------------------------------------------------
   // Catalogue of textures: tile size in metres, canvas resolution, draw function
   // ---------------------------------------------------------------------------
+  // Door textures (one tile = one door leaf, 0.9 x 2.1 m)
+  // ---------------------------------------------------------------------------
+  // Panelled door: two columns x three rows of recessed panels, optionally with wood grain.
+  function drawDoorPanels(ctx, W, H, hex, o) {
+    var R = mulberry32(o.seed || 3);
+    var b = toRgb(hex);
+    ctx.fillStyle = css(b);
+    ctx.fillRect(0, 0, W, H);
+    if (o.grain) woodGrain(ctx, 0, 0, W, H, R, false, o.grain, 0.22);
+    var stile = W * 0.13, gap = W * 0.06, rail = H * 0.05;
+    var cols = 2, rows = 3;
+    var pw = (W - 2 * stile - gap * (cols - 1)) / cols;
+    var ph = (H - 2 * rail - gap * (rows - 1)) / rows;
+    for (var r = 0; r < rows; r++) {
+      for (var c = 0; c < cols; c++) {
+        var x = stile + c * (pw + gap);
+        var y = rail + r * (ph + gap);
+        ctx.fillStyle = 'rgba(0,0,0,0.07)';
+        ctx.fillRect(x, y, pw, ph);
+        if (o.grain) woodGrain(ctx, x, y, pw, ph, R, false, Math.round(o.grain / 5), 0.18);
+        // shadow on the top-left edges, light on the bottom-right: the panel looks recessed
+        ctx.fillStyle = 'rgba(0,0,0,0.38)';
+        ctx.fillRect(x, y, pw, 3); ctx.fillRect(x, y, 3, ph);
+        ctx.fillStyle = 'rgba(255,255,255,0.22)';
+        ctx.fillRect(x, y + ph - 3, pw, 3); ctx.fillRect(x + pw - 3, y, 3, ph);
+      }
+    }
+  }
+
+  // Flush veneered door: long vertical grain, no panels.
+  function drawDoorFlush(ctx, W, H, hex) {
+    var R = mulberry32(17);
+    var b = toRgb(hex);
+    ctx.fillStyle = css(b);
+    ctx.fillRect(0, 0, W, H);
+    var strips = 4;
+    for (var i = 0; i < strips; i++) {
+      var shade = 0.93 + R() * 0.14;
+      ctx.fillStyle = css(b, shade);
+      ctx.fillRect((W / strips) * i, 0, W / strips, H);
+      woodGrain(ctx, (W / strips) * i, 0, W / strips, H, R, false, 26, 0.24);
+      ctx.fillStyle = 'rgba(0,0,0,0.22)';
+      ctx.fillRect((W / strips) * i, 0, 1.5, H);
+    }
+  }
+
+  // Steel entrance door: brushed metal with a few stamped ribs.
+  function drawDoorSteel(ctx, W, H, hex) {
+    drawCloudy(ctx, W, H, hex, 0.1);
+    var R = mulberry32(9);
+    for (var i = 0; i < 260; i++) {
+      ctx.strokeStyle = R() < 0.5 ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.06)';
+      ctx.lineWidth = 1;
+      var y = R() * H;
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y + (R() - 0.5) * 3); ctx.stroke();
+    }
+    var m = W * 0.1;
+    ctx.strokeStyle = 'rgba(0,0,0,0.35)'; ctx.lineWidth = 3;
+    ctx.strokeRect(m, H * 0.05, W - 2 * m, H * 0.9);
+    ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+    ctx.strokeRect(m + 3, H * 0.05 + 3, W - 2 * m, H * 0.9);
+  }
+
+  // ---------------------------------------------------------------------------
   var DEFS = {
     textured: { tileW: 0.5, tileH: 0.5, px: [256, 256], bump: 1.0, draw: drawTextured },
     'wp-plain': { tileW: 0.25, tileH: 0.25, px: [256, 256], bump: 0.15, draw: drawWpPlain },
@@ -424,7 +488,13 @@
     tile: { tileW: 1.2, tileH: 1.2, px: [480, 480], bump: 0.6, draw: drawTile },
     marble: { tileW: 1.6, tileH: 1.6, px: [512, 512], bump: 0.1, draw: drawMarble },
     concrete: { tileW: 1.2, tileH: 1.2, px: [512, 512], bump: 0.4, draw: function (c, W, H, hex) { drawCloudy(c, W, H, hex, 0.35); } },
-    carpet: { tileW: 0.3, tileH: 0.3, px: [256, 256], bump: 1.2, draw: drawCarpet }
+    carpet: { tileW: 0.3, tileH: 0.3, px: [256, 256], bump: 1.2, draw: drawCarpet },
+
+    // doors: one tile covers the whole leaf
+    'door-paint': { tileW: 0.9, tileH: 2.1, px: [360, 840], bump: 1.4, draw: function (c, W, H, hex) { drawDoorPanels(c, W, H, hex, { seed: 3 }); } },
+    'door-veneer': { tileW: 0.9, tileH: 2.1, px: [360, 840], bump: 0.5, draw: drawDoorFlush },
+    'door-solid': { tileW: 0.9, tileH: 2.1, px: [360, 840], bump: 1.4, draw: function (c, W, H, hex) { drawDoorPanels(c, W, H, hex, { seed: 11, grain: 60 }); } },
+    'door-steel': { tileW: 0.9, tileH: 2.1, px: [360, 840], bump: 0.8, draw: drawDoorSteel }
   };
 
   // ---------------------------------------------------------------------------

@@ -57,7 +57,7 @@
 
       <h2>How it works</h2>
       <ul>
-        <li>Pick a ready-made design (Scandinavian, Loft, Classic and more) or build your own: walls, accent wall, floor, ceiling and skirting board.</li>
+        <li>Pick a ready-made design (Scandinavian, Loft, Classic and more) or build your own: walls, accent wall, floor, ceiling, skirting board and door.</li>
         <li>Every surface has materials (paint, brick, microcement, herringbone parquet, porcelain tile...) and dozens of colours. In total there are <strong id="variant-count">…</strong> combinations.</li>
         <li>Look at a wall or the floor for a second and it gets selected in VR. You can also click with the mouse or say, for example: "red brick walls", "dark walnut herringbone floor", "loft design".</li>
         <li>Walk around and look in every direction: drag the mouse to look 360°, W A S D or the arrow keys to walk, Q / E to turn. In a headset: left stick walks, right stick turns. The panel follows you.</li>
@@ -130,7 +130,7 @@
     <a-entity id="l-bulb" light="type: point; color: #fff2cf; intensity: 0.9; distance: 8; decay: 1" position="1.5 2.1 -1.5"></a-entity>
 
     <!-- ======================= Room: 5 m wide, 4 m deep, 2.7 m high ======================= -->
-    <!-- Surfaces: three walls ("walls"), the far wall ("accent", follows the walls until set), floor, ceiling, skirting. -->
+    <!-- Surfaces: three walls ("walls"), the far wall ("accent", follows the walls until set), floor, ceiling, skirting, door. -->
     <a-plane class="interactive" surface="name: accent" position="0 1.35 -3.5" width="5" height="2.7" material="color: #9b9a96; roughness: 1"></a-plane>
     <a-plane class="interactive" surface="name: walls" position="0 1.35 0.5" rotation="0 180 0" width="5" height="2.7" material="color: #9b9a96; roughness: 1"></a-plane>
     <a-plane class="interactive" surface="name: walls" position="-2.5 1.35 -1.5" rotation="0 90 0" width="4" height="2.7" material="color: #9b9a96; roughness: 1"></a-plane>
@@ -150,7 +150,7 @@
     <a-entity radiator="fins: 10; width: 1; height: 0.55" position="0.8 0.52 -3.4"></a-entity>
 
     <!-- Door (left wall) -->
-    <a-box position="-2.47 1.05 -2.4" rotation="0 90 0" width="0.9" height="2.1" depth="0.05" color="#7a5230"></a-box>
+    <a-box class="interactive" surface="name: door" position="-2.47 1.05 -2.4" rotation="0 90 0" width="0.9" height="2.1" depth="0.05" color="#7a5230"></a-box>
     <a-sphere position="-2.42 1.0 -2.05" radius="0.03" color="#c9c9c9" material="metalness: 0.8; roughness: 0.3"></a-sphere>
 
     <!-- Skirting boards (hidden in the raw apartment; the catalogue decides height and look) -->

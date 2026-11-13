@@ -23,7 +23,8 @@
     { key: 'walls', re: /^(?:walls?|wallpapers?)$/ },
     { key: 'floor', re: /^(?:floors?|flooring)$/ },
     { key: 'ceiling', re: /^ceilings?$/ },
-    { key: 'skirting', re: /^(?:skirting|baseboards?|plinth)$/ }
+    { key: 'skirting', re: /^(?:skirting|baseboards?|plinth)$/ },
+    { key: 'door', re: /^(?:doors?|doorway)$/ }
   ];
 
   // ---- Words that name a material ---------------------------------------------
@@ -31,8 +32,8 @@
   // board, which material the word means. def: the surface used when the phrase names none.
   // prio: when two words name a material of one surface the higher prio wins ("herringbone parquet").
   var MAT_WORDS = [
-    { re: /^(?:paint|painted|painting|emulsion)$/, map: { wall: 'paint', ceiling: 'paint' }, def: 'walls', prio: 1 },
-    { re: /^(?:matt|matte|flat)$/, map: { wall: 'paint', ceiling: 'matt' }, def: 'walls', prio: 1 },
+    { re: /^(?:paint|painted|painting|emulsion|enamel|enamelled|lacquered)$/, map: { wall: 'paint', ceiling: 'paint', door: 'door-paint' }, def: 'walls', prio: 1 },
+    { re: /^(?:matt|matte|flat)$/, map: { wall: 'paint', ceiling: 'matt', door: 'door-paint' }, def: 'walls', prio: 1 },
     { re: /^(?:textured|texture|structured)$/, map: { wall: 'textured' }, def: 'walls', prio: 1 },
     { re: /^(?:wallpapers?|nonwoven|vinyl wallpaper)$/, map: { wall: 'wp-plain' }, def: 'walls', prio: 1 },
     { re: /^(?:stripe|stripes|striped|stripy|pinstripe)$/, map: { wall: 'wp-stripe' }, def: 'walls', prio: 2 },
@@ -44,7 +45,7 @@
     { re: /^laminate$/, map: { floor: 'laminate' }, def: 'floor', prio: 1 },
     { re: /^parquet$/, map: { floor: 'parquet' }, def: 'floor', prio: 1 },
     { re: /^(?:herringbone|chevron)$/, map: { floor: 'herringbone' }, def: 'floor', prio: 2 },
-    { re: /^(?:engineered|solid)$/, map: { floor: 'engineered' }, def: 'floor', prio: 1 },
+    { re: /^(?:engineered|solid)$/, map: { floor: 'engineered', door: 'door-solid' }, def: 'floor', prio: 1 },
     { re: /^(?:vinyl|spc|lvt)$/, map: { floor: 'spc' }, def: 'floor', prio: 1 },
     { re: /^(?:tile|tiles|tiled|porcelain|ceramic)$/, map: { floor: 'tile' }, def: 'floor', prio: 1 },
     { re: /^(?:marble|stone|travertine)$/, map: { floor: 'marble' }, def: 'floor', prio: 1 },
@@ -54,8 +55,11 @@
     { re: /^(?:stretch|suspended)$/, map: { ceiling: 'matt' }, def: 'ceiling', prio: 0 },
     { re: /^(?:pvc|plastic)$/, map: { skirting: 'pvc' }, def: 'skirting', prio: 1 },
     { re: /^mdf$/, map: { skirting: 'mdf' }, def: 'skirting', prio: 1 },
-    { re: /^(?:wooden|wood)$/, map: { skirting: 'wood', wall: 'slats', floor: 'parquet' }, def: 'skirting', prio: 0.5 }, // an adjective: a noun such as "slats" wins
-    { re: /^(?:alumin(?:i)?um|shadow)$/, map: { skirting: 'alu' }, def: 'skirting', prio: 1 }
+    { re: /^(?:wooden|wood)$/, map: { skirting: 'wood', wall: 'slats', floor: 'parquet', door: 'door-veneer' }, def: 'skirting', prio: 0.5 }, // an adjective: a noun such as "slats" wins
+    { re: /^(?:alumin(?:i)?um|shadow)$/, map: { skirting: 'alu' }, def: 'skirting', prio: 1 },
+    { re: /^(?:veneer|veneered|flush)$/, map: { door: 'door-veneer' }, def: 'door', prio: 1 },
+    { re: /^(?:panel|panels|panelled|paneled|panelling)$/, map: { door: 'door-solid' }, def: 'door', prio: 1 },
+    { re: /^(?:steel|metal|metallic|armoured|armored|entrance|security)$/, map: { door: 'door-steel' }, def: 'door', prio: 1 }
   ];
 
   var WALLPAPER = MAT_WORDS.filter(function (e) { return e.map.wall === 'wp-plain'; })[0]; // the entry for the word "wallpaper"
@@ -237,7 +241,7 @@
       }
       else implicit = ctx.selected || null;
       if (implicit) surfaces.push({ key: implicit, idx: -1, mats: [], cols: [], implicit: true });
-      else problems.push('First choose what to change: walls, floor, ceiling or skirting board.');
+      else problems.push('First choose what to change: walls, floor, ceiling, skirting board or door.');
     }
 
     // Who owns a word? "walls blue floor dark oak" (surface first): words belong to the surface

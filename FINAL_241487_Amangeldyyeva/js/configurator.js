@@ -3,7 +3,7 @@
  * The finishing configurator of the demo developer (A-Frame 1.8.0).
  *
  * Contents
- *   1. surface       : a wall, the floor, the ceiling or the skirting board (selectable, shows its finish)
+ *   1. surface       : a wall, the floor, the ceiling, the skirting board or the door (selectable, shows its finish)
  *   2. ui-button     : makes a panel button react to hover and click
  *   3. configurator  : the state machine (intro -> room -> summary), the panel, price, captions, log
  *   4. boot          : intro page, voice wiring, debug bar
@@ -37,7 +37,7 @@
   // 1. surface: a part of the room that can be selected and finished
   // ---------------------------------------------------------------------------
   AFRAME.registerComponent('surface', {
-    schema: { name: { type: 'string' } }, // walls | accent | floor | ceiling | skirting
+    schema: { name: { type: 'string' } }, // walls | accent | floor | ceiling | skirting | door
 
     init: function () {
       var self = this;
@@ -203,7 +203,7 @@
     init: function () {
       this.state = {
         mode: 'intro', // intro | room | summary
-        selected: null, // walls | accent | floor | ceiling | skirting
+        selected: null, // walls | accent | floor | ceiling | skirting | door
         choice: K.emptyChoice(),
         preview: false, // true = show the unfinished apartment ("before renovation")
         light: 'day' // day | evening
@@ -552,7 +552,7 @@
 
     defaultHint: function () {
       var s = this.state.selected;
-      if (!s) return 'What to change? Look at a wall, the floor or the ceiling, or press a tab.';
+      if (!s) return 'What to change? Look at a wall, the floor or the door, or press a tab.';
       var ch = this.state.choice[s];
       if (!ch) {
         return s === 'accent'
@@ -623,7 +623,7 @@
         // Tabs: surfaces
         rows.push({
           h: 0.095,
-          items: equal(5, function (i) {
+          items: equal(K.SURFACES.length, function (i) {
             var s = K.SURFACES[i];
             var on = st.selected === s;
             return {
@@ -675,7 +675,7 @@
             rows.push({ h: sw, items: items, left: true });
           }
         } else {
-          rows.push({ h: 0.2, items: [full('Choose a tab: walls, accent, floor,\nceiling or skirting. Or say, for example:\n"red brick walls", "herringbone floor".', { color: '#cfd6e0' })] });
+          rows.push({ h: 0.2, items: [full('Choose a tab: walls, accent, floor, ceiling,\nskirting or door. Or say, for example:\n"red brick walls", "walnut veneer door".', { color: '#cfd6e0' })] });
         }
 
         // Hint line (changes when the pointer is over a colour or material)
