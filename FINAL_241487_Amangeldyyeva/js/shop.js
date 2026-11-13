@@ -88,6 +88,20 @@
     updateTotal();
   }
 
+  // ---------------------------------------------------------------- furniture toggle
+  var furnitureOn = false;
+  function applyFurniture() {
+    var c = cfg();
+    var f = $('#furniture');
+    var show = furnitureOn && !(c && c.state.preview);
+    if (f) f.setAttribute('visible', show);
+    var b = $('#tb-furniture');
+    if (b) {
+      b.textContent = 'Furniture: ' + (furnitureOn ? 'on' : 'off');
+      b.setAttribute('aria-pressed', furnitureOn ? 'true' : 'false');
+    }
+  }
+
   // ---------------------------------------------------------------- 3. quote
   function hash6(s) {
     var h = 2166136261;
@@ -225,7 +239,7 @@
     buildBookingForm();
 
     var scene = $('a-scene');
-    scene.addEventListener('choice-changed', updateTotal);
+    scene.addEventListener('choice-changed', function () { updateTotal(); applyFurniture(); });
     scene.addEventListener('mode-changed', function () {
       if (cfg() && cfg().state.mode !== 'intro') showTopbar();
     });
@@ -237,6 +251,11 @@
       updateTotal();
     });
 
+    $('#tb-furniture').addEventListener('click', function () {
+      furnitureOn = !furnitureOn;
+      if (cfg()) cfg().log('furniture', 'topbar', furnitureOn ? 'on' : 'off');
+      applyFurniture();
+    });
     $('#tb-quote').addEventListener('click', openQuote);
     $('#tb-book').addEventListener('click', openBooking);
     $('#q-print').addEventListener('click', function () { cfg().log('quote_print', 'quote', quoteRef()); window.print(); });
