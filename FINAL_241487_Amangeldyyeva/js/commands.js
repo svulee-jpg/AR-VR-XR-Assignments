@@ -36,6 +36,7 @@
     { re: /^(?:matt|matte|flat)$/, map: { wall: 'paint', ceiling: 'matt', door: 'door-paint' }, def: 'walls', prio: 1 },
     { re: /^(?:textured|texture|structured)$/, map: { wall: 'textured' }, def: 'walls', prio: 1 },
     { re: /^(?:wallpapers?|nonwoven|vinyl wallpaper)$/, map: { wall: 'wp-plain' }, def: 'walls', prio: 1 },
+    { re: /^(?:horizontal|wide)$/, map: { wall: 'wp-hstripe' }, def: 'walls', prio: 2 },
     { re: /^(?:stripe|stripes|striped|stripy|pinstripe)$/, map: { wall: 'wp-stripe' }, def: 'walls', prio: 2 },
     { re: /^(?:plaster|venetian|stucco)$/, map: { wall: 'plaster' }, def: 'walls', prio: 1 },
     { re: /^bricks?$/, map: { wall: 'brick' }, def: 'walls', prio: 1 },
@@ -67,6 +68,7 @@
   // ---- Ready-made designs ------------------------------------------------------
   var PRESET_WORDS = [
     { key: 'scandi', re: /^scandi/ },
+    { key: 'living', re: /^(?:living|lounge)$/ },
     { key: 'loft', re: /^loft$/ },
     { key: 'classic', re: /^classic/ },
     { key: 'minimal', re: /^minimal/ },

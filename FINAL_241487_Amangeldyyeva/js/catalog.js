@@ -154,6 +154,7 @@
     { key: 'textured', label: 'Textured paint', price: 4800, palette: 'paint', rough: 0.95, metal: 0 },
     { key: 'wp-plain', label: 'Wallpaper (non-woven)', price: 4200, palette: 'paint', rough: 0.9, metal: 0 },
     { key: 'wp-stripe', label: 'Striped wallpaper', price: 5600, palette: 'stripe', rough: 0.9, metal: 0 },
+    { key: 'wp-hstripe', label: 'Wide horizontal stripe wallpaper', price: 6200, palette: 'stripe', rough: 0.9, metal: 0 },
     { key: 'plaster', label: 'Decorative plaster', price: 8500, palette: 'plaster', rough: 0.8, metal: 0 },
     { key: 'brick', label: 'Brick (loft)', price: 10500, palette: 'brick', rough: 0.95, metal: 0 },
     { key: 'microcement', label: 'Microcement', price: 12500, palette: 'micro', rough: 0.55, metal: 0 },
@@ -222,6 +223,10 @@
   var PRESETS = [
     { key: 'scandi', label: 'Scandinavian',
       walls: ['paint', 'white'], accent: ['slats', 'light-oak'], floor: ['laminate', 'bleached-oak'],
+      ceiling: ['matt', 'white'], skirting: ['mdf', 'white'],
+      door: ['door-paint', 'white'] },
+    { key: 'living', label: 'Living room',
+      walls: ['paint', 'white'], accent: ['wp-hstripe', 'brown'], floor: ['engineered', 'light-oak'],
       ceiling: ['matt', 'white'], skirting: ['mdf', 'white'],
       door: ['door-paint', 'white'] },
     { key: 'loft', label: 'Loft',

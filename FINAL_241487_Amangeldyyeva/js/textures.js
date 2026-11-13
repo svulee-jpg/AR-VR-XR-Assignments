@@ -152,6 +152,25 @@
     });
   }
 
+  // Wide horizontal stripe wallpaper: dark base colour with lighter bands, about 17 cm each.
+  function drawWpHStripe(ctx, W, H, hex) {
+    var b = toRgb(hex);
+    var dark = mix(b, [0, 0, 0], 0.35);
+    var light = mix(b, [235, 215, 175], 0.55);
+    var half = H / 2; // tile 34 cm high: one dark and one light band
+    ctx.fillStyle = css(dark); ctx.fillRect(0, 0, W, half + 1);
+    ctx.fillStyle = css(light); ctx.fillRect(0, half, W, half);
+    ctx.fillStyle = 'rgba(0,0,0,0.12)';
+    ctx.fillRect(0, half - 1, W, 2); ctx.fillRect(0, 0, W, 2);
+    var img = ctx.getImageData(0, 0, W, H);
+    var d = img.data;
+    for (var p = 0; p < d.length; p += 4) {
+      var n = (hash2(p >> 2, 3, 13) - 0.5) * 12;
+      d[p] = clamp(d[p] + n); d[p + 1] = clamp(d[p + 1] + n); d[p + 2] = clamp(d[p + 2] + n);
+    }
+    ctx.putImageData(img, 0, 0);
+  }
+
   // Striped wallpaper: 10 cm stripes, one lighter, with a thin line between them.
   function drawWpStripe(ctx, W, H, hex) {
     var b = toRgb(hex);
@@ -470,6 +489,7 @@
   var DEFS = {
     textured: { tileW: 0.5, tileH: 0.5, px: [256, 256], bump: 1.0, draw: drawTextured },
     'wp-plain': { tileW: 0.25, tileH: 0.25, px: [256, 256], bump: 0.15, draw: drawWpPlain },
+    'wp-hstripe': { tileW: 0.34, tileH: 0.34, px: [256, 256], bump: 0.1, draw: drawWpHStripe },
     'wp-stripe': { tileW: 0.4, tileH: 0.4, px: [320, 320], bump: 0.1, draw: drawWpStripe },
     plaster: { tileW: 1.0, tileH: 1.0, px: [512, 512], bump: 1.2, draw: drawPlaster },
     brick: { tileW: 1.04, tileH: 0.9, px: [520, 450], bump: -1.6, draw: drawBrick },

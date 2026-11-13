@@ -73,6 +73,7 @@ check('steel door black', ['set:door:door-steel:black']);
 check('wooden door walnut', ['set:door:door-veneer:walnut']);
 check('panelled door walnut', ['set:door:door-solid:walnut']);
 check('door white', ['set:door:door-paint:white']);
+check('accent wall wide horizontal stripe wallpaper brown', ['set:accent:wp-hstripe:brown']);
 
 // ---- Ceiling, skirting, accent wall ---------------------------------------------
 check('ceiling glossy white', ['set:ceiling:gloss:white']);

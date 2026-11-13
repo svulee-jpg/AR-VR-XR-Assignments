@@ -20,6 +20,7 @@
   };
 
   var PACKAGE_TEXT = {
+    living: 'White walls, brown striped feature wall, light oak floor. The showroom living room.',
     scandi: 'Light, calm, natural wood. Good for small rooms.',
     loft: 'Raw brick, microcement and black accents.',
     classic: 'Warm plaster, herringbone floor, wallpaper stripe.',
@@ -89,7 +90,7 @@
   }
 
   // ---------------------------------------------------------------- furniture toggle
-  var furnitureOn = false;
+  var furnitureOn = true;
   function applyFurniture() {
     var c = cfg();
     var f = $('#furniture');
@@ -236,6 +237,11 @@
   // ---------------------------------------------------------------- wiring
   function boot() {
     buildPackages();
+    // The showroom living room is pre-selected, so the first visit starts with it.
+    var first = $('#packages') && $('#packages').querySelector('.pkg');
+    var livingIdx = K.PRESETS.map(function (p) { return p.key; }).indexOf('living');
+    if (livingIdx >= 0 && $('#packages').children[livingIdx]) $('#packages').children[livingIdx].click();
+    applyFurniture();
     buildBookingForm();
 
     var scene = $('a-scene');
