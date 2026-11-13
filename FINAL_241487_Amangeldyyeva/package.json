@@ -1,0 +1,11 @@
+{
+  "name": "voice-vr-finishes-configurator",
+  "version": "1.0.0",
+  "description": "Voice-controlled VR configurator for apartment finishes (AR/VR/XR Applications, final capstone, brief B6)",
+  "private": true,
+  "scripts": {
+    "start": "python3 -m http.server 8000",
+    "test": "node tests/commands.test.js",
+    "build-model": "python3 tools/make_fan.py"
+  }
+}
