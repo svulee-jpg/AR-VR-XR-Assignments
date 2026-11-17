@@ -22,7 +22,7 @@ project is not affiliated with any company, uses no company branding, and all **
 - **Target device:** desktop Chrome with the **Immersive Web Emulator** (Meta Quest profile); the specification accepts an emulator as a VR target. The page also runs in the Quest browser (voice is usually not available there; the buttons are).
 - **Live URL:** *(add after deployment to GitHub Pages)*
 
-Run from a fresh clone (needs Python 3 and an internet connection for the A-Frame scripts):
+Run from a fresh clone (needs Python 3; A-Frame is stored in `vendor/`, so the page opens without a CDN. Voice recognition still needs an internet connection):
 
 ```bash
 git clone https://github.com/svulee-jpg/AR-VR-XR-Assignments.git
@@ -38,8 +38,8 @@ Rebuild the fan model: `npm run build-model` (Python 3, standard library only).
 
 | Part | Version |
 |---|---|
-| A-Frame | 1.8.0 (CDN: aframe.io/releases/1.8.0) |
-| aframe-extras (animation-mixer) | 7.7.0 (CDN: jsDelivr) |
+| A-Frame | 1.8.0 (copy in `vendor/aframe-1.8.0.min.js`, MIT licence) |
+| aframe-extras (animation-mixer) | 7.7.0 (copy in `vendor/aframe-extras-7.7.0.min.js`, MIT licence) |
 | Browser tested | Chrome (desktop) |
 
 No API keys, no server, no build step.
@@ -127,6 +127,8 @@ no image files and no licence issues. Texture tiles have real-world sizes (a bri
 | Living room furniture and decor (sofa, armchair, coffee table, rug, lamps, mirror, painting) | Own work, built from simple Three.js shapes and drawn textures in `js/livingset.js`; modelled on a photo of a real living room used only as a visual reference (the photo is not in the repository) | Own work |
 | All material textures (brick, parquet, marble, ...) | Own work, drawn by `js/textures.js` at runtime | Own work |
 | Prices, designs, catalogue | Invented for this demo | Own work |
+
+| `vendor/aframe-1.8.0.min.js`, `vendor/aframe-extras-7.7.0.min.js` | A-Frame (aframe.io) and aframe-extras (Don McCurdy), unmodified copies of the pinned releases | MIT (licence files in `vendor/`) |
 
 No AI-generated images. No third-party models or textures.
 
