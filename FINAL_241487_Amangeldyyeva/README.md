@@ -80,7 +80,7 @@ no image files and no licence issues. Texture tiles have real-world sizes (a bri
 | Top bar: Before / after | Full-screen wipe between the rough apartment and your variant (drag the divider or use the slider) |
 | Top bar: Furniture on/off | Shows the furnished showroom living room (sofa, armchair, glass table, rug, lamps, mirror, painting; own work, `js/livingset.js`); hidden in the "before renovation" view. The "Living room" design package (white walls, brown wide-stripe feature wall, light oak floor) is pre-selected on the landing page |
 | Top bar: Book consultation | Request form (name, contact, day, time); registers a demo reference number, nothing is sent |
-| Landing page (shown before the VR scene) | Company front page of the fictional finishing studio "Aurora Homes": hero, facts (number of combinations, live price), seven design packages with a picture and the price of each, "what you can change", how it works, and the start section that explains the microphone permission before it is requested. The "Living room" design is pre-selected; the pictures are renders of the own 3D room (`img/`) |
+| Landing page (shown before the VR scene) | Company front page of the fictional finishing atelier "Aurora Homes" in a quiet-luxury style (warm black, ivory, champagne accent, thin serif, full-screen hero picture): the collection of seven interiors with a picture and the price of each, the finishes, the process, and a private-viewing section that explains the microphone permission before it is requested. The "Living room" interior is pre-selected; the pictures are renders of the own 3D room (`img/`). No web fonts or external images, so it works offline |
 
 ### Voice commands (English, Chrome)
 

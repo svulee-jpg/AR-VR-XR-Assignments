@@ -58,7 +58,9 @@
       pic.src = 'img/room-' + p.key + '.jpg';
       pic.alt = p.label + ' design, rendered in the apartment';
       pic.loading = 'lazy';
-      b.appendChild(pic);
+      var pw = el('span', 'pw');
+      pw.appendChild(pic);
+      b.appendChild(pw);
       var body = el('div', 'body');
       var sw = el('div', 'sw');
       ['walls', 'accent', 'floor', 'door', 'ceiling'].forEach(function (s) {
@@ -79,7 +81,7 @@
         Array.prototype.forEach.call(box.children, function (c) { c.setAttribute('aria-pressed', 'false'); });
         b.setAttribute('aria-pressed', on ? 'true' : 'false');
         var hint = $('#pkg-hint');
-        if (hint) hint.textContent = on ? 'Selected: ' + p.label + '. It will be applied when you enter the apartment; you can change everything afterwards.' : 'Or skip this and start from the raw apartment.';
+        if (hint) hint.textContent = on ? 'Selected: ' + p.label + '. It will be applied when you enter the apartment; you can change everything afterwards.' : 'Begin with a composed interior, or start from the raw apartment.';
       });
       box.appendChild(b);
     });
