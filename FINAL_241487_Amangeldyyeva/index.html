@@ -18,6 +18,7 @@
   <script src="js/app.js"></script>
   <script src="js/configurator.js"></script>
   <script src="js/livingset.js"></script>
+  <script src="js/windowview.js"></script>
   <script src="js/shop.js"></script>
   <script src="js/drawer.js"></script>
   <script src="js/compare.js"></script>
@@ -152,6 +153,7 @@
     <div class="spacer"></div>
     <div class="total"><small>Your finishing total</small><strong id="tb-total">not chosen yet</strong></div>
     <button id="tb-furniture" class="btn" type="button" aria-pressed="true">Furniture: on</button>
+    <button id="tb-view" class="btn" type="button">View: city</button>
     <button id="tb-compare" class="btn" type="button">Before / after</button>
     <button id="tb-quote" class="btn" type="button">Get quote</button>
     <button id="tb-book" class="btn primary" type="button">Book consultation</button>
@@ -297,15 +299,9 @@
     <a-plane class="interactive" surface="name: floor" position="0 0 -1.5" rotation="-90 0 0" width="5" height="4" material="color: #77746f; roughness: 1"></a-plane>
     <a-plane class="interactive" surface="name: ceiling" position="0 2.7 -1.5" rotation="90 0 0" width="5" height="4" material="color: #ecebe8; roughness: 1"></a-plane>
 
-    <!-- Window with frame and sill (left wall, next to the door) -->
-    <a-entity id="window-group" position="-2.5 0 -0.9" rotation="0 90 0">
-      <a-plane id="window-glass" position="0 1.6 0.01" width="1.2" height="1.1" material="shader: flat; color: #dff1ff"></a-plane>
-      <a-box position="0 2.17 0.04" width="1.4" height="0.1" depth="0.06" color="#f2f2f0"></a-box>
-      <a-box position="0 1.03 0.04" width="1.4" height="0.1" depth="0.06" color="#f2f2f0"></a-box>
-      <a-box position="-0.65 1.6 0.04" width="0.1" height="1.2" depth="0.06" color="#f2f2f0"></a-box>
-      <a-box position="0.65 1.6 0.04" width="0.1" height="1.2" depth="0.06" color="#f2f2f0"></a-box>
-      <a-box position="0 1.6 0.04" width="0.04" height="1.1" depth="0.04" color="#f2f2f0"></a-box>
-      <a-box position="0 0.97 0.12" width="1.6" height="0.05" depth="0.2" color="#f6f6f4"></a-box>
+    <!-- Arched steel window with a view drawn in code (js/windowview.js): frame, glass, sill and curtains.
+         The view (city / sea / garden) and the light (day / evening) are set by the configurator. -->
+    <a-entity id="window-group" position="-2.5 0 -0.9" rotation="0 90 0" window-view="view: city; light: day">
       <a-entity radiator="fins: 10; width: 1; height: 0.55" position="0 0.52 0.1"></a-entity>
     </a-entity>
 

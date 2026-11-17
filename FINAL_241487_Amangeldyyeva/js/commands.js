@@ -11,6 +11,7 @@
  *   "ceiling glossy white"            "accent wall wooden slats"
  *   "light grey walls"                "loft design"      "random"
  *   "show summary"  "before"  "after"  "evening"  "back"  "reset"
+ *   "sea view"  "city view"  "garden view"      (what is behind the window)
  */
 (function (root) {
   'use strict';
@@ -85,7 +86,10 @@
     { type: 'before', re: /^(?:before|raw|rough|unfinished|original)$/ },
     { type: 'after', re: /^(?:after|renovated|finished)$/ },
     { type: 'light-day', re: /^(?:day|daytime|daylight|morning|noon)$/ },
-    { type: 'light-evening', re: /^(?:evening|night|dusk|sunset|lamp|bulb)$/ }
+    { type: 'light-evening', re: /^(?:evening|night|dusk|sunset|lamp|bulb)$/ },
+    { type: 'view-city', re: /^(?:city|town|skyline|downtown|urban)$/ },
+    { type: 'view-sea', re: /^(?:sea|ocean|caspian|beach|seaside|coast|shore)$/ },
+    { type: 'view-garden', re: /^(?:garden|trees|blossom|orchard)$/ }
   ];
   var CLEAR_WORDS = /^(?:no|without|remove|cancel|none)$/;
 
@@ -158,7 +162,7 @@
    *   actions:
    *     {type:'set', surface, material, colour}   (always fully resolved)
    *     {type:'select', surface}   {type:'clear', surface:'accent'}   {type:'preset', key}
-   *     {type:'summary'|'room'|'reset'|'random'|'before'|'after'|'light-day'|'light-evening'}
+   *     {type:'summary'|'room'|'reset'|'random'|'before'|'after'|'light-day'|'light-evening'|'view-city'|'view-sea'|'view-garden'}
    *   problems: strings that explain what could not be applied.
    */
   function parse(text, ctx) {
@@ -228,8 +232,8 @@
       }
     }
 
-    // "show before": the word "show" must not also open the summary
-    if (actions.some(function (a) { return a.type === 'before' || a.type === 'after'; })) {
+    // "show before", "show the sea": the word "show" must not also open the summary
+    if (actions.some(function (a) { return a.type === 'before' || a.type === 'after' || a.type.indexOf('view-') === 0; })) {
       actions = actions.filter(function (a) { return a.type !== 'summary'; });
     }
 

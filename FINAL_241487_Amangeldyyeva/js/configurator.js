@@ -206,7 +206,8 @@
         selected: null, // walls | accent | floor | ceiling | skirting | door
         choice: K.emptyChoice(),
         preview: false, // true = show the unfinished apartment ("before renovation")
-        light: 'day' // day | evening
+        light: 'day', // day | evening
+        view: 'city' // what is behind the window: city | sea | garden
       };
       this.panel = document.querySelector('#panel');
       this.caption = document.querySelector('#caption');
@@ -382,17 +383,40 @@
         set('#l-ambient', 'light', { color: '#ffd9b8', intensity: 0.5 });
         set('#l-sun', 'light', { color: '#ffb877', intensity: 0.08 });
         set('#l-bulb', 'light', { color: '#ffc880', intensity: 1.7 });
-        set('#window-glass', 'material', { color: '#1b2745' });
       } else {
         set('#l-ambient', 'light', { color: '#ffffff', intensity: 1.1 });
         set('#l-sun', 'light', { color: '#fff6e0', intensity: 0.8 });
         set('#l-bulb', 'light', { color: '#fff2cf', intensity: 0.9 });
-        set('#window-glass', 'material', { color: '#dff1ff' });
       }
+      this.applyWindow();
       this.renderPanel();
       var msg = mode === 'evening' ? 'Evening lighting' : 'Daytime lighting';
       if (source !== 'voice') this.setCaption(msg, 'info');
       return msg;
+    },
+
+    // Tell the window which view to show and in which light (see js/windowview.js).
+    applyWindow: function () {
+      var w = document.querySelector('#window-group');
+      if (w) w.setAttribute('window-view', { view: this.state.view, light: this.state.light });
+    },
+
+    setView: function (view, source) {
+      if (this.state.mode === 'intro') return null;
+      this.state.view = view;
+      this.log('view', source, view);
+      this.applyWindow();
+      this.renderPanel();
+      this.el.emit('view-changed', { view: view });
+      var msg = 'Window view: ' + view;
+      if (source !== 'voice') this.setCaption(msg, 'info');
+      return msg;
+    },
+
+    // The next view in the order city -> sea -> garden -> city (button and panel).
+    nextView: function () {
+      var list = ['city', 'sea', 'garden'];
+      return list[(list.indexOf(this.state.view) + 1) % list.length];
     },
 
     showSummary: function (source) {
@@ -458,6 +482,7 @@
       else if (action === 'random') msg = this.random(source);
       else if (action === 'preview') msg = this.setPreview(!this.state.preview, source);
       else if (action === 'light') msg = this.setLight(this.state.light === 'day' ? 'evening' : 'day', source);
+      else if (action === 'view') msg = this.setView(this.nextView(), source);
       else if (action === 'summary') msg = this.showSummary(source);
       else if (action === 'room') msg = this.showRoom(source);
       else if (action === 'reset') msg = this.reset(source);
@@ -485,6 +510,9 @@
         else if (a.type === 'after') msg = self.setPreview(false, 'voice');
         else if (a.type === 'light-day') msg = self.setLight('day', 'voice');
         else if (a.type === 'light-evening') msg = self.setLight('evening', 'voice');
+        else if (a.type === 'view-city') msg = self.setView('city', 'voice');
+        else if (a.type === 'view-sea') msg = self.setView('sea', 'voice');
+        else if (a.type === 'view-garden') msg = self.setView('garden', 'voice');
         else if (a.type === 'summary') msg = self.showSummary('voice');
         else if (a.type === 'room') msg = self.showRoom('voice');
         else if (a.type === 'reset') msg = self.reset('voice');
@@ -688,17 +716,23 @@
         // Tools
         rows.push({
           h: 0.085,
-          items: equal(3, function (i) {
-            if (i === 0) return { text: 'Random variant', bg: DARK, ui: { action: 'random', hint: 'A random combination of all finishes' } };
+          items: equal(4, function (i) {
+            if (i === 0) return { text: 'Random', bg: DARK, ui: { action: 'random', hint: 'A random combination of all finishes' } };
             if (i === 1) {
               return {
-                text: st.preview ? 'Show: your variant' : 'Show: before renovation', bg: st.preview ? '#975a16' : DARK,
+                text: st.preview ? 'Your variant' : 'Before', bg: st.preview ? '#975a16' : DARK,
                 ui: { action: 'preview', hint: 'Compare with the rough finish of the apartment' }
               };
             }
+            if (i === 2) {
+              return {
+                text: st.light === 'day' ? 'Light: day' : 'Light: evening', bg: DARK,
+                ui: { action: 'light', hint: 'Switch between day and evening light' }
+              };
+            }
             return {
-              text: st.light === 'day' ? 'Light: day → evening' : 'Light: evening → day', bg: DARK,
-              ui: { action: 'light', hint: 'How the room looks in the evening' }
+              text: 'View: ' + st.view, bg: DARK,
+              ui: { action: 'view', hint: 'Window view: city, sea or garden' }
             };
           })
         });

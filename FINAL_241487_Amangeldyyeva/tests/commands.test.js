@@ -126,6 +126,13 @@ check('show before', ['before'], null, '"show" must not open the summary');
 check('after', ['after']);
 check('evening', ['light-evening']);
 check('day', ['light-day']);
+check('sea view', ['view-sea'], null, 'the word "view" alone does nothing');
+check('city view', ['view-city']);
+check('garden view', ['view-garden']);
+check('show the sea', ['view-sea'], null, '"show" must not open the summary together with the view');
+check('view', []);
+check('window', []);
+check('evening sea view', ['light-evening', 'view-sea']);
 check('hello there', [], null, 'not a command');
 
 // ---- Things that do not exist -------------------------------------------------------

@@ -116,6 +116,13 @@
     }
   }
 
+  // ---------------------------------------------------------------- window view button
+  function applyViewLabel() {
+    var c = cfg();
+    var b = $('#tb-view');
+    if (b && c) b.textContent = 'View: ' + c.state.view;
+  }
+
   // ---------------------------------------------------------------- 3. quote
   function hash6(s) {
     var h = 2166136261;
@@ -275,6 +282,10 @@
       if (cfg()) cfg().log('furniture', 'topbar', furnitureOn ? 'on' : 'off');
       applyFurniture();
     });
+    $('#tb-view').addEventListener('click', function () {
+      if (cfg()) { cfg().setView(cfg().nextView(), 'topbar'); applyViewLabel(); }
+    });
+    scene.addEventListener('view-changed', applyViewLabel);
     $('#tb-quote').addEventListener('click', openQuote);
     $('#tb-book').addEventListener('click', openBooking);
     $('#q-print').addEventListener('click', function () { cfg().log('quote_print', 'quote', quoteRef()); window.print(); });
