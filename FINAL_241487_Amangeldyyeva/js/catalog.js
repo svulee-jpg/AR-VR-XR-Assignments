@@ -221,12 +221,12 @@
   // 3. Ready-made designs ("choose a finished design, we do the rest")
   // ---------------------------------------------------------------------------
   var PRESETS = [
-    { key: 'scandi', label: 'Scandinavian',
-      walls: ['paint', 'white'], accent: ['slats', 'light-oak'], floor: ['laminate', 'bleached-oak'],
-      ceiling: ['matt', 'white'], skirting: ['mdf', 'white'],
-      door: ['door-paint', 'white'] },
     { key: 'living', label: 'Living room',
       walls: ['paint', 'white'], accent: ['wp-hstripe', 'brown'], floor: ['engineered', 'light-oak'],
+      ceiling: ['matt', 'white'], skirting: ['mdf', 'white'],
+      door: ['door-paint', 'white'] },
+    { key: 'scandi', label: 'Scandinavian',
+      walls: ['paint', 'white'], accent: ['slats', 'light-oak'], floor: ['laminate', 'bleached-oak'],
       ceiling: ['matt', 'white'], skirting: ['mdf', 'white'],
       door: ['door-paint', 'white'] },
     { key: 'loft', label: 'Loft',

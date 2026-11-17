@@ -57,49 +57,88 @@
 
   <div id="intro">
     <div class="landing">
-      <div class="brandbar">
-        <div class="logo"><span class="logo-mark"></span>Aurora Homes</div>
-        <div class="tag">Aurora Residence, Block B · Apartment 128 · fictional demo developer</div>
-      </div>
+      <header class="nav">
+        <div class="wrap nav-in">
+          <div class="logo"><span class="logo-mark"></span>Aurora Homes <small>Finishing studio</small></div>
+          <nav class="nav-links" aria-label="Page sections">
+            <a href="#styles">Styles</a><a href="#change">What you can change</a><a href="#how">How it works</a><a href="#start" class="nav-cta">Start</a>
+          </nav>
+        </div>
+      </header>
 
-      <div class="hero">
-        <div class="card">
-          <h1>Walk into your apartment before it is finished</h1>
-          <p class="sub">Choose the walls, floor, ceiling, skirting board and door in virtual reality. See the price change with every click, get a printable offer and book a meeting with a finishing manager.</p>
-          <div class="facts">
+      <section class="hero2">
+        <div class="hero-bg" role="img" aria-label="Rendered living room with a striped feature wall, leather sofa and an arc floor lamp"></div>
+        <div class="wrap hero-in">
+          <p class="eyebrow">Aurora Residence · Block B · Apartment 128</p>
+          <h1>Design your home<br>before it is built.</h1>
+          <p class="sub">Walk through your apartment in virtual reality. Choose walls, floor, ceiling, door and more, watch the price update with every choice, and leave with a printable offer.</p>
+          <div class="hero-actions">
+            <a class="btn-hero primary" href="#styles">Choose a style</a>
+            <a class="btn-hero ghost" href="#start">Go straight to the apartment</a>
+          </div>
+          <div class="facts glass">
             <div class="fact"><b id="variant-count">…</b><span>possible combinations</span></div>
-            <div class="fact"><b>7</b><span>ready-made designs</span></div>
+            <div class="fact"><b id="design-count">7</b><span>ready-made designs</span></div>
             <div class="fact"><b>6</b><span>surfaces to finish</span></div>
+            <div class="fact"><b>Live</b><span>price and monthly payment</span></div>
           </div>
         </div>
+      </section>
+
+      <section class="wrap block" id="styles">
+        <p class="kicker">Step 1</p>
+        <h2 class="section-title">Pick a style to start from</h2>
+        <p class="section-sub" id="pkg-hint">Or skip this and start from the raw apartment.</p>
+        <div class="packages" id="packages"></div>
+      </section>
+
+      <section class="wrap block" id="change">
+        <p class="kicker">Step 2</p>
+        <h2 class="section-title">Then make it yours</h2>
+        <p class="section-sub">Every surface has its own materials and colours, with the real price per square metre.</p>
+        <div class="surfaces">
+          <div><b>Walls</b>Paint, wallpaper, plaster, microcement, brick</div>
+          <div><b>Accent wall</b>Stripes, slats, brick or a colour of your own</div>
+          <div><b>Floor</b>Parquet, herringbone, laminate, stone, concrete</div>
+          <div><b>Ceiling</b>Matt or gloss, from white to graphite</div>
+          <div><b>Skirting board</b>Painted, wood, PVC or hidden aluminium</div>
+          <div><b>Interior door</b>Painted, veneer, solid wood or steel</div>
+        </div>
+      </section>
+
+      <section class="wrap block" id="how">
+        <p class="kicker">How it works</p>
+        <h2 class="section-title">From idea to offer in four steps</h2>
         <ol class="steps">
           <li><b>Choose</b>Pick a ready-made design or build your own, with the mouse, by gaze, in a headset or with your voice.</li>
           <li><b>Check the price</b>The total and the monthly mortgage payment update live while you choose.</li>
           <li><b>Get your offer</b>Open a printable quote with a picture of your room, or share a link to your variant.</li>
           <li><b>Book a consultation</b>Leave a request and a manager confirms the details. Nothing is built until you decide.</li>
         </ol>
-      </div>
+      </section>
 
-      <h2 class="section-title">Start from a design package</h2>
-      <p class="section-sub" id="pkg-hint">Or skip this and start from the raw apartment.</p>
-      <div class="packages" id="packages"></div>
-
-      <div class="cta">
-        <div class="perm">
-          <strong>What you need to allow: the microphone (optional).</strong><br>
-          It is only used to change the finishes with your voice (English). While recognition is on, Chrome sends the audio to Google's speech recognition service. This app does not record or store audio and does not save any personal data. The camera and location are not used.
+      <section class="wrap block" id="start">
+        <div class="startbox">
+          <div>
+            <p class="kicker">Ready?</p>
+            <h2 class="section-title">Step into your apartment</h2>
+            <div class="perm">
+              <strong>What you need to allow: the microphone (optional).</strong><br>
+              It is only used to change the finishes with your voice (English). While recognition is on, Chrome sends the audio to Google's speech recognition service. This app does not record or store audio and does not save any personal data. The camera and location are not used.
+            </div>
+          </div>
+          <div class="buttons">
+            <button id="btn-voice" class="big" type="button">Start with voice</button>
+            <button id="btn-novoice" class="big" type="button">Start without voice</button>
+          </div>
         </div>
-        <div class="buttons">
-          <button id="btn-voice" class="big" type="button">Start with voice</button>
-          <button id="btn-novoice" class="big" type="button">Start without voice</button>
+        <div class="trust">
+          <div><b>Look around freely</b>Drag the mouse to look 360°, W A S D or arrows to walk, Q / E to turn. In a headset: left stick walks, right stick turns.</div>
+          <div><b>Say it or click it</b>For example: "red brick walls", "walnut veneer door", "loft design". Every function also works without a microphone.</div>
+          <div><b>Honest demo</b>Aurora Homes is a fictional developer made for a university project. Prices are made up and are not an offer. No personal data is sent or stored.</div>
         </div>
-      </div>
-
-      <div class="trust">
-        <div><b>Look around freely</b>Drag the mouse to look 360°, W A S D or arrows to walk, Q / E to turn. In a headset: left stick walks, right stick turns.</div>
-        <div><b>Say it or click it</b>For example: "red brick walls", "walnut veneer door", "loft design". Every function also works without a microphone.</div>
-        <div><b>Honest demo</b>Aurora Homes is a fictional developer made for a university project. Prices are made up and are not an offer. No personal data is sent or stored.</div>
-      </div>
+        <p class="imgcredit">Pictures on this page are renders of the 3D apartment in this project (own work).</p>
+      </section>
     </div>
   </div>
 

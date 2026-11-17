@@ -45,12 +45,21 @@
   function buildPackages() {
     var box = $('#packages');
     if (!box) return;
+    var dc = $('#design-count');
+    if (dc) dc.textContent = K.PRESETS.length;
     K.PRESETS.forEach(function (p) {
       var choice = K.presetChoice(p.key);
       var total = K.price(choice).total;
       var b = el('button', 'pkg');
       b.type = 'button';
       b.setAttribute('aria-pressed', 'false');
+      var pic = document.createElement('img');
+      pic.className = 'pic';
+      pic.src = 'img/room-' + p.key + '.jpg';
+      pic.alt = p.label + ' design, rendered in the apartment';
+      pic.loading = 'lazy';
+      b.appendChild(pic);
+      var body = el('div', 'body');
       var sw = el('div', 'sw');
       ['walls', 'accent', 'floor', 'door', 'ceiling'].forEach(function (s) {
         var ch = choice[s] || choice.walls;
@@ -58,10 +67,12 @@
         i.style.background = ch ? K.colour(ch.c).hex : '#888';
         sw.appendChild(i);
       });
-      b.appendChild(sw);
-      b.appendChild(el('div', 'nm', p.label));
-      b.appendChild(el('div', 'pr', 'from ' + money(total)));
-      b.appendChild(el('div', 'ds', PACKAGE_TEXT[p.key] || ''));
+      body.appendChild(sw);
+      body.appendChild(el('div', 'nm', p.label));
+      body.appendChild(el('div', 'pr', 'from ' + money(total)));
+      body.appendChild(el('div', 'ds', PACKAGE_TEXT[p.key] || ''));
+      body.appendChild(el('div', 'sel', 'Selected'));
+      b.appendChild(body);
       b.addEventListener('click', function () {
         var on = pendingPreset !== p.key;
         pendingPreset = on ? p.key : null;
