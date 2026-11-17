@@ -95,6 +95,7 @@
       .toLowerCase()
       .replace(/[^a-z0-9\s]/g, ' ')
       .replace(/\s+/g, ' ')
+      .replace(/\bliving room\b/g, 'living') // "living room" is the design name, not the word "room"
       .trim();
   }
 

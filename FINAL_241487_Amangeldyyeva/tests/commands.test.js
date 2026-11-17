@@ -111,6 +111,7 @@ check('walls', ['select:walls']);
 check('floor', ['select:floor']);
 check('loft design', ['preset:loft']);
 check('scandinavian', ['preset:scandi']);
+check('living room design', ['preset:living']);
 check('classic style', ['preset:classic']);
 check('cozy', ['preset:cosy'], null, 'US spelling');
 check('dark luxe', ['preset:luxe']);
