@@ -203,4 +203,58 @@ withDoor.door = { m: 'door-solid', c: 'oak' };
 assert.strictEqual(Catalog.price(withDoor).total, Math.round(38000 * Catalog.AREAS.door));
 passed += 3;
 
+// ---- Walking between rooms and removing furniture by voice -----------------------------------------
+function one(phrase) {
+  const r = C.parse(phrase, {});
+  assert.strictEqual(r.actions.length, 1, `"${phrase}" -> ${JSON.stringify(r.actions)}`);
+  return r.actions[0];
+}
+// rooms: "go to ..." always walks; a bare room name walks except "living room" (that is the design preset)
+[['go to the kitchen', 'kitchen'], ['take me to the bedroom', 'bedroom'], ['go to the living room', 'living'],
+ ['walk to the hallway', 'hall'], ['bring me to the bathroom', 'bath'], ['kitchen', 'kitchen'], ['bathroom', 'bath']
+].forEach(([phrase, room]) => {
+  const a = one(phrase);
+  assert.deepStrictEqual([a.type, a.room], ['goto', room], phrase);
+  passed++;
+});
+assert.strictEqual(one('living room').type, 'preset');      // the design called "Living room"
+passed++;
+// furniture: everything at once, one piece, bring it back
+assert.strictEqual(one('remove the furniture').type, 'furniture-off');
+assert.strictEqual(one('empty apartment').type, 'furniture-off');
+assert.strictEqual(one('furniture on').type, 'furniture-on');
+passed += 3;
+[['remove the sofa', 'remove-item', 'sofa'], ['hide the floor lamp', 'remove-item', 'floor lamp'],
+ ['remove toilet', 'remove-item', 'toilet'], ['restore the sofa', 'restore-item', 'sofa'],
+ ['bring back the toilet', 'restore-item', 'toilet'], ['put back the coffee table', 'restore-item', 'coffee table']
+].forEach(([phrase, type, text]) => {
+  const a = one(phrase);
+  assert.deepStrictEqual([a.type, a.text], [type, text], phrase);
+  passed++;
+});
+// removing a FINISH is not removing furniture ("remove the accent wall" stays a finish command)
+assert.notStrictEqual(C.parse('remove the accent wall', {}).actions[0] && C.parse('remove the accent wall', {}).actions[0].type, 'remove-item');
+passed++;
+
+// ---- The floor plan: every room can be reached on foot, with and without furniture ----------------
+const Plan = require('../js/plan.js');
+function reachable(radius) {
+  const step = 0.1, key = (i, j) => i + ',' + j, seen = new Set();
+  const s0 = Plan.ROOMS[0].spawn, stack = [[Math.round(s0.x / step), Math.round(s0.z / step)]];
+  seen.add(key(stack[0][0], stack[0][1]));
+  while (stack.length) {
+    const [i, j] = stack.pop();
+    [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(([di, dj]) => {
+      const a = i + di, b = j + dj, k = key(a, b);
+      if (seen.has(k) || !Plan.walkable(a * step, b * step, radius, true)) return;
+      seen.add(k); stack.push([a, b]);
+    });
+  }
+  return Plan.ROOMS.every(r => seen.has(key(Math.round(r.spawn.x / step), Math.round(r.spawn.z / step))));
+}
+assert.strictEqual(Plan.ROOMS.length, 5);
+Plan.ROOMS.forEach(r => assert.ok(Plan.walkable(r.spawn.x, r.spawn.z, 0.25, true), `spawn of ${r.id} is blocked`));
+assert.ok(reachable(0.25), 'some room cannot be reached from the hallway');
+passed += 7;
+
 console.log(`OK: ${passed} checks passed; ${Catalog.fmt(Catalog.countVariants())} variants in the catalogue`);

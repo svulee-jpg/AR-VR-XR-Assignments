@@ -19,6 +19,7 @@ presentation. It is updated as the work goes on.
 | Claude (Anthropic), Claude Sonnet 5.5 | Interior door as a sixth surface; company layer (landing page with design packages, live price bar, printable quote, consultation booking); material-card drawer and before/after wipe | 13 Nov 2026 |
 | Claude (Anthropic), Claude Sonnet 5.5 | Landing page in a quiet-luxury style with renders of the own room; arched steel window with curtains and marble sill and three code-drawn views (city, sea, garden) for day and evening (`js/windowview.js`), voice words "sea view", "city view", "garden view" and the View button | 18 Nov 2026 |
 | Claude (Anthropic), Claude Sonnet 5.5 | Showroom living room: new wide stripe wallpaper, "Living room" design, procedural furniture and decor (`js/livingset.js`) modelled on a reference photo; README and test updates | 13 and 18 Nov 2026 |
+| Claude (Anthropic), Claude Sonnet 5.5 | Five-room walkable apartment (floor plan, walls, doors, collision), furniture for kitchen, bedroom, hallway and bathroom, removable furniture (click and voice), room navigation (bar, panel, voice), realism pass (tone mapping, contact shadows), fix of the design changing by itself, new tests | 18 Nov 2026 |
 
 ## What I did myself
 

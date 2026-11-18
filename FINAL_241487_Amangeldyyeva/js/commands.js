@@ -12,6 +12,8 @@
  *   "light grey walls"                "loft design"      "random"
  *   "show summary"  "before"  "after"  "evening"  "back"  "reset"
  *   "sea view"  "city view"  "garden view"      (what is behind the window)
+ *   "go to the kitchen"  "bedroom"  "bathroom"  "hallway"  "go to the living room"   (walk to a room)
+ *   "remove the sofa"  "restore the sofa"  "remove furniture"  "show furniture"      (furniture)
  */
 (function (root) {
   'use strict';
@@ -93,6 +95,46 @@
   ];
   var CLEAR_WORDS = /^(?:no|without|remove|cancel|none)$/;
 
+  // ---- Rooms (walking) and furniture ---------------------------------------------
+  // "living" alone is a design name (the "Living room" design), so a room is only chosen by it when the
+  // phrase contains a verb such as "go to"; the other room names work alone ("kitchen").
+  var ROOM_WORDS = [
+    { id: 'hall', re: /\b(?:hall|hallway|corridor|entrance|entry|foyer)\b/ },
+    { id: 'living', re: /\b(?:living|lounge)\b/ },
+    { id: 'kitchen', re: /\bkitchen\b/ },
+    { id: 'bedroom', re: /\b(?:bedroom|bed room)\b/ },
+    { id: 'bath', re: /\b(?:bathroom|bath|toilet|shower)\b/ }
+  ];
+  var GO_WORDS = /\b(?:go|walk|move|take|enter|visit|head|navigate|teleport|bring (?:me|us))\b/;
+  var FURNITURE_WORD = /\b(?:furniture|furnishings?)\b/;
+  var REMOVE_VERBS = /\b(?:remove|delete|hide|clear|without|empty|off|no)\b/;
+  // Words for pieces of furniture; "remove the floor lamp" is furniture even though "floor" is also a finish.
+  var FURNITURE_NOUNS = /\b(?:sofa|couch|armchair|chair|chairs|stool|bench|table|desk|lamp|lamps|pendant|chandelier|rug|carpet|runner|mat|bed|nightstand|bedside|wardrobe|closet|fridge|refrigerator|oven|stove|cooker|hood|mirror|painting|picture|plant|plants|cabinet|console|toilet|shower|vanity|washer|washing machine|towels?|kitchen units?|cupboards?|air conditioner|ac)\b/;
+  var SHOW_VERBS = /\b(?:show|bring|restore|put|add|return|with|on|back)\b/;
+
+  function matchRoom(norm) {
+    var hit = null;
+    ROOM_WORDS.forEach(function (r) { if (r.re.test(norm)) hit = r.id; });
+    if (!hit) return null;
+    if (/\b(?:remove|delete|hide|restore|put back|bring back|take away|get rid)\b/.test(norm)) return null; // "remove toilet" is about furniture
+    var words = norm.split(' ');
+    if (GO_WORDS.test(norm) || (words.length <= 2 && hit !== 'living')) return hit;
+    return null;
+  }
+
+  // "remove the sofa" -> { type: 'remove-item', text: 'sofa' }; "remove furniture" -> furniture-off
+  function matchFurniture(norm, hasFinishWord) {
+    if (/\bempty\b.*\b(?:room|apartment|flat)\b/.test(norm) || (FURNITURE_WORD.test(norm) && REMOVE_VERBS.test(norm))) {
+      return { type: 'furniture-off' };
+    }
+    if (FURNITURE_WORD.test(norm) && SHOW_VERBS.test(norm)) return { type: 'furniture-on' };
+    var r = /\b(?:restore|bring back|put back)\s+(?:the\s+|a\s+|my\s+)?(.+)$/.exec(norm);
+    if (r) return { type: 'restore-item', text: r[1] };
+    var m = /\b(?:remove|delete|hide|take away|get rid of)\s+(?:the\s+|a\s+|my\s+)?(.+)$/.exec(norm);
+    if (m && (FURNITURE_NOUNS.test(m[1]) || !hasFinishWord(m[1]))) return { type: 'remove-item', text: m[1] };
+    return null;
+  }
+
   // ---- Helpers --------------------------------------------------------------
   function normalise(text) {
     return String(text || '')
@@ -163,15 +205,28 @@
    *     {type:'set', surface, material, colour}   (always fully resolved)
    *     {type:'select', surface}   {type:'clear', surface:'accent'}   {type:'preset', key}
    *     {type:'summary'|'room'|'reset'|'random'|'before'|'after'|'light-day'|'light-evening'|'view-city'|'view-sea'|'view-garden'}
+   *     {type:'goto', room}  {type:'furniture-on'|'furniture-off'}  {type:'remove-item'|'restore-item', text}
    *   problems: strings that explain what could not be applied.
    */
   function parse(text, ctx) {
     ctx = ctx || {};
     var current = ctx.current || {};
     var heard = String(text || '').trim();
-    var tokens = normalise(heard).split(' ').filter(Boolean);
+    var norm = normalise(heard);
+    var tokens = norm.split(' ').filter(Boolean);
     var actions = [];
     var problems = [];
+
+    // walking and furniture are checked first; they never mix with finishes
+    var room = matchRoom(norm);
+    if (room) return { heard: heard, actions: [{ type: 'goto', room: room }], problems: [] };
+    var furn = matchFurniture(norm, function (text) {
+      return text.split(' ').some(function (t) {
+        return SURFACE_WORDS.some(function (sw) { return sw.re.test(t); }) ||
+          MAT_WORDS.some(function (mw) { return mw.re.test(t); }) || isColourToken(t);
+      });
+    });
+    if (furn) return { heard: heard, actions: [furn], problems: [] };
 
     var surfaces = []; // { key, idx, mats: [{entry, idx, token}], cols: [{token, idx}] }
     var mats = [];

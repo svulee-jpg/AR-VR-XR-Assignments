@@ -15,7 +15,7 @@
   var BRAND = {
     name: 'Aurora Homes',
     project: 'Aurora Residence, Block B',
-    apartment: 'Apartment 128 · demo room 5 × 4 m',
+    apartment: 'Apartment 128 · 5 rooms, 70 m²',
     refPrefix: 'AH'
   };
 
@@ -99,21 +99,67 @@
   function showTopbar() {
     var bar = $('#topbar');
     if (bar) bar.classList.add('on');
+    var rb = $('#roombar');
+    if (rb) rb.classList.add('on');
     updateTotal();
+    updateRoomBar();
   }
 
   // ---------------------------------------------------------------- furniture toggle
-  var furnitureOn = true;
+  // The state lives in Kit.Furniture (js/kit.js): on/off, removed pieces, remove mode.
   function applyFurniture() {
     var c = cfg();
+    var F = window.Kit && window.Kit.Furniture;
+    if (!F) return;
+    var hide = !!(c && c.state.preview);       // the "before renovation" view shows an empty apartment
+    F.setHidden(hide);
     var f = $('#furniture');
-    var show = furnitureOn && !(c && c.state.preview);
-    if (f) f.setAttribute('visible', show);
+    if (f) f.setAttribute('visible', F.enabled && !hide);
     var b = $('#tb-furniture');
     if (b) {
-      b.textContent = 'Furniture: ' + (furnitureOn ? 'on' : 'off');
-      b.setAttribute('aria-pressed', furnitureOn ? 'true' : 'false');
+      b.textContent = 'Furniture: ' + (F.enabled ? 'on' : 'off');
+      b.setAttribute('aria-pressed', F.enabled ? 'true' : 'false');
     }
+    var rm = $('#rb-remove');
+    if (rm) {
+      rm.textContent = F.removeMode ? 'Click a piece to remove it' : 'Remove furniture';
+      rm.classList.toggle('on', F.removeMode);
+    }
+  }
+
+  // ---------------------------------------------------------------- room bar (walk between the five rooms)
+  function buildRoomBar() {
+    var bar = $('#roombar');
+    var P = window.Plan;
+    if (!bar || !P) return;
+    P.ROOMS.forEach(function (r) {
+      var b = el('button', 'chip', r.name);
+      b.type = 'button';
+      b.dataset.room = r.id;
+      b.addEventListener('click', function () { if (cfg()) cfg().goTo(r.id, 'roombar'); });
+      bar.appendChild(b);
+    });
+    var sep = el('span', 'sep');
+    bar.appendChild(sep);
+    var rm = el('button', 'chip tool', 'Remove furniture');
+    rm.type = 'button';
+    rm.id = 'rb-remove';
+    rm.addEventListener('click', function () { if (cfg()) cfg().setRemoveMode(!window.Kit.Furniture.removeMode, 'roombar'); });
+    bar.appendChild(rm);
+    var back = el('button', 'chip tool', 'Restore all');
+    back.type = 'button';
+    back.addEventListener('click', function () { if (cfg()) cfg().restoreAllFurniture('roombar'); });
+    bar.appendChild(back);
+  }
+
+  function updateRoomBar() {
+    var P = window.Plan;
+    var room = P && AVR.room ? P.room(AVR.room) : null;
+    Array.prototype.forEach.call(document.querySelectorAll('#roombar .chip[data-room]'), function (b) {
+      b.classList.toggle('on', !!room && b.dataset.room === room.id);
+    });
+    var w = $('#topbar .where');
+    if (w) w.textContent = 'Aurora Residence · Apartment 128' + (room ? ' · ' + room.name : '');
   }
 
   // ---------------------------------------------------------------- window view button
@@ -257,15 +303,15 @@
   // ---------------------------------------------------------------- wiring
   function boot() {
     buildPackages();
-    // The showroom living room is pre-selected, so the first visit starts with it.
-    var first = $('#packages') && $('#packages').querySelector('.pkg');
-    var livingIdx = K.PRESETS.map(function (p) { return p.key; }).indexOf('living');
-    if (livingIdx >= 0 && $('#packages').children[livingIdx]) $('#packages').children[livingIdx].click();
+    // Nothing is pre-selected: the apartment stays as it is until the visitor chooses a design.
+    buildRoomBar();
     applyFurniture();
     buildBookingForm();
 
     var scene = $('a-scene');
     scene.addEventListener('choice-changed', function () { updateTotal(); applyFurniture(); });
+    scene.addEventListener('furniture-changed', applyFurniture);
+    scene.addEventListener('room-changed', updateRoomBar);
     scene.addEventListener('mode-changed', function () {
       if (cfg() && cfg().state.mode !== 'intro') showTopbar();
     });
@@ -278,9 +324,7 @@
     });
 
     $('#tb-furniture').addEventListener('click', function () {
-      furnitureOn = !furnitureOn;
-      if (cfg()) cfg().log('furniture', 'topbar', furnitureOn ? 'on' : 'off');
-      applyFurniture();
+      if (cfg()) cfg().setFurniture(!window.Kit.Furniture.enabled, 'topbar');
     });
     $('#tb-view').addEventListener('click', function () {
       if (cfg()) { cfg().setView(cfg().nextView(), 'topbar'); applyViewLabel(); }

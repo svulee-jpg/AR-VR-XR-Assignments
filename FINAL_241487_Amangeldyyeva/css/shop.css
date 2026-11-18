@@ -222,3 +222,14 @@
 .cmp-tag.l { left: 14px; } .cmp-tag.r { right: 14px; }
 .cmp-bar { display: flex; gap: 16px; align-items: center; padding: 10px 90px 10px 14px; background: #15171c; }
 .cmp-bar input { flex: 1; }
+
+/* ---------- Room bar: five rooms, remove / restore furniture ---------- */
+#roombar { position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); z-index: 6; display: none; align-items: center; gap: 6px; padding: 6px; max-width: calc(100vw - 24px); overflow-x: auto; background: rgba(21,23,28,0.88); backdrop-filter: blur(6px); border: 1px solid var(--line); border-radius: 999px; color: #fff; }
+#roombar.on { display: flex; }
+#roombar .chip { font: inherit; font-size: 13px; color: #fff; background: transparent; border: 1px solid transparent; border-radius: 999px; padding: 8px 14px; cursor: pointer; white-space: nowrap; }
+#roombar .chip:hover, #roombar .chip:focus-visible { border-color: var(--brand); outline: none; }
+#roombar .chip.on { background: var(--brand); color: #1b1d22; font-weight: 600; }
+#roombar .chip.tool { color: #cfd6e0; }
+#roombar .chip.tool.on { background: #975a16; color: #fff; border-color: #975a16; }
+#roombar .sep { width: 1px; align-self: stretch; background: var(--line); margin: 4px 4px; }
+@media print { #roombar { display: none !important; } }

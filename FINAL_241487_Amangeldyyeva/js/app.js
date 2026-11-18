@@ -5,8 +5,8 @@
  * Contents
  *   1. canvas-text : draws any text (Cyrillic, emoji) on a plane, so the app does not depend on
  *                    A-Frame's font files
- *   2. rig-move    : walking (keyboard, VR thumbstick) and turning, kept inside the room
- *      panel-follow: keeps the configurator panel in front of the user
+ *   2. rig-move    : walking (keyboard, VR thumbstick) and turning; walls stop the visitor, doors let them through
+ *      panel-follow: keeps the configurator panel in front of the user, inside the room where they stand
  *   3. radiator    : builds the radiator fins from primitives
  *   4. fps-meter   : measures the frame rate (shown with ?debug)
  *
@@ -142,7 +142,7 @@
   });
 
   // ---------------------------------------------------------------------------
-  // 4. rig-move: walking around the room, 360 degree view, kept inside the walls
+  // 4. rig-move: walking through the apartment, 360 degree view, collision with walls and furniture
   // ---------------------------------------------------------------------------
   // The camera sits inside a "rig" entity. Looking around is done by look-controls (mouse drag,
   // headset), walking by this component:
@@ -150,17 +150,20 @@
   //             right arrow) turn the whole view, so the room can be seen from every side
   //   VR      : left thumbstick walks, right thumbstick turns in 30 degree steps
   // The camera is never moved by the app on its own (comfort); the rig only moves while the
-  // user asks for it, and it is clamped so that the user cannot walk through a wall.
+  // user asks for it. Plan.walkable() (js/plan.js) says where a person can stand: inside the five rooms
+  // and in the door openings. A step that would end inside a wall is cancelled; along a wall the visitor
+  // slides. `goTo(room)` (room buttons, voice) is the only jump, and it is always asked for by the user.
   AFRAME.registerComponent('rig-move', {
     schema: {
       speed: { default: 1.6 }, // metres per second
       turnSpeed: { default: 80 }, // degrees per second (keyboard turn)
-      minX: { default: -2.2 }, maxX: { default: 2.2 },
-      minZ: { default: -3.2 }, maxZ: { default: 0.2 }
+      radius: { default: 0.22 } // how close to a wall the camera may come (metres)
     },
 
     init: function () {
       var self = this;
+      this.last = null; // last allowed camera position
+      this.roomId = null;
       this.keys = {};
       this.stick = { x: 0, y: 0 };
       this.cam = this.el.querySelector('[camera]');
@@ -227,12 +230,54 @@
         rig.position.z += (fz * fwd + fx * side) * step;
       }
 
-      // keep the CAMERA (not the rig) inside the room: shift the rig by the overshoot
+      // collision: the CAMERA (not the rig) must stay on walkable ground
       this.cam.object3D.getWorldPosition(this.pos);
-      var cx = Math.min(d.maxX, Math.max(d.minX, this.pos.x));
-      var cz = Math.min(d.maxZ, Math.max(d.minZ, this.pos.z));
-      rig.position.x += cx - this.pos.x;
-      rig.position.z += cz - this.pos.z;
+      var Plan = window.Plan;
+      if (!Plan) return;
+      var r = d.radius;
+      var nx = this.pos.x, nz = this.pos.z;
+      if (!this.last) this.last = { x: nx, z: nz };
+      if (!Plan.walkable(nx, nz, r, true)) {
+        // slide along the wall: try to keep one of the two coordinates
+        if (Plan.walkable(nx, this.last.z, r, true)) nz = this.last.z;
+        else if (Plan.walkable(this.last.x, nz, r, true)) nx = this.last.x;
+        else { nx = this.last.x; nz = this.last.z; }
+        rig.position.x += nx - this.pos.x;
+        rig.position.z += nz - this.pos.z;
+      }
+      this.last.x = nx; this.last.z = nz;
+
+      // which room are we in? (the room label, the panel and the room buttons follow this)
+      var room = Plan.roomAt(nx, nz);
+      if (room && room.id !== this.roomId) {
+        this.roomId = room.id;
+        AVR.room = room.id;
+        this.el.sceneEl.emit('room-changed', { room: room.id });
+      }
+    },
+
+    // Put the visitor at the arrival point of a room (used by the room buttons and the voice command).
+    goTo: function (roomId) {
+      var Plan = window.Plan;
+      var room = Plan && Plan.room(roomId);
+      if (!room || !this.cam) return false;
+      var rig = this.el.object3D;
+      var s = room.spawn;
+      // turn the whole view so that the camera looks in the direction of the arrival point
+      this.cam.object3D.getWorldDirection(this.dir);
+      var current = Math.atan2(this.dir.x, this.dir.z); // 0 = looking towards -Z, positive = to the left
+      rig.rotation.y += s.yaw * Math.PI / 180 - current;
+      rig.updateMatrixWorld(true);
+      this.cam.object3D.getWorldPosition(this.pos);
+      rig.position.x += s.x - this.pos.x;
+      rig.position.z += s.z - this.pos.z;
+      this.last = null;
+      if (this.roomId !== room.id) {
+        this.roomId = room.id;
+        AVR.room = room.id;
+        this.el.sceneEl.emit('room-changed', { room: room.id });
+      }
+      return true;
     }
   });
 
@@ -248,8 +293,7 @@
       height: { default: 1.35 },
       turnLimit: { default: 70 }, // degrees
       maxDistance: { default: 2.8 },
-      minX: { default: -2.3 }, maxX: { default: 2.3 },
-      minZ: { default: -3.4 }, maxZ: { default: 0.4 }
+      margin: { default: 0.25 } // how close to a wall the panel may come
     },
 
     init: function () {
@@ -258,11 +302,14 @@
       this.cd = new THREE.Vector3();
       this.target = new THREE.Vector3();
       this.gliding = false;
+      this.snap = false;
+      // area where the panel may stand: the room of the user (updated every frame)
+      this.b = { minX: -2.3, maxX: 2.3, minZ: -3.4, maxZ: 0.4 };
     },
 
     // Distance from (ox, oz) along the unit direction (dx, dz) to the edge of the allowed panel area.
     rayLength: function (ox, oz, dx, dz) {
-      var d = this.data, t = 99;
+      var d = this.b, t = 99;
       if (dx > 1e-6) t = Math.min(t, (d.maxX - ox) / dx);
       else if (dx < -1e-6) t = Math.min(t, (d.minX - ox) / dx);
       if (dz > 1e-6) t = Math.min(t, (d.maxZ - oz) / dz);
@@ -279,6 +326,15 @@
       // getWorldDirection of a plain Object3D returns its +Z axis, i.e. BEHIND the user, so the view heading
       // (0 = looking towards -Z, positive = turned to the left) is atan2(x, z) of that vector
       var yaw = Math.atan2(this.cd.x, this.cd.z);
+
+      // the panel lives in the room where the user stands: when they walk into another room it moves there at once
+      var Plan = window.Plan;
+      var room = Plan && Plan.roomAt(this.cp.x, this.cp.z);
+      if (room) {
+        this.b = { minX: room.x0 + d.margin, maxX: room.x1 - d.margin, minZ: room.z0 + d.margin, maxZ: room.z1 - d.margin };
+        var panelRoom = Plan.roomAt(panel.position.x, panel.position.z);
+        if (!panelRoom || panelRoom.id !== room.id) { this.gliding = true; this.snap = true; }
+      }
 
       // where the panel is relative to the view direction
       var dx = panel.position.x - this.cp.x;
@@ -301,8 +357,8 @@
         }
         var dd = Math.min(d.distance, bestLen);
         this.target.set(this.cp.x - Math.sin(bestH) * dd, d.height, this.cp.z - Math.cos(bestH) * dd);
-        var t = Math.min(1, delta / 250);
-        panel.position.lerp(this.target, t);
+        if (this.snap) { panel.position.copy(this.target); this.snap = false; }
+        else panel.position.lerp(this.target, Math.min(1, delta / 250));
         if (panel.position.distanceTo(this.target) < 0.04) this.gliding = false;
       }
       // always face the user (rotate around the vertical axis only)

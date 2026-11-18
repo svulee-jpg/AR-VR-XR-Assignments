@@ -17,6 +17,7 @@
   var THREE = AFRAME.THREE;
   var C = window.Commands;
   var K = window.Catalog;
+  var Kit = window.Kit;
   var AVR = (window.AVR = window.AVR || {});
 
   // Which input caused a click? (used in the log)
@@ -112,13 +113,11 @@
         var geo = el.getAttribute('geometry') || {};
         var sx = geo.width || 1;
         var sy = geo.height || 1;
-        var map = new THREE.CanvasTexture(look.tex.canvas);
-        var bump = new THREE.CanvasTexture(look.tex.bump);
-        map.colorSpace = THREE.SRGBColorSpace;
+        // Clones share the picture (and its GPU copy) with the cached base texture; only the repeat differs per surface.
+        var map = look.tex.map.clone();
+        var bump = look.tex.bump.clone();
         [map, bump].forEach(function (t) {
-          t.wrapS = t.wrapT = THREE.RepeatWrapping;
           t.repeat.set(sx / look.tex.tileW, sy / look.tex.tileH);
-          t.anisotropy = 8;
           t.needsUpdate = true;
         });
         mat.map = map;
@@ -220,15 +219,20 @@
       this.logRows = [];
       AVR.cfg = this;
 
-      // A shared variant code in the page address (#v=...) restores a choice.
+      // A shared link (#v=...) opens that variant. The address is cleared afterwards and is never
+      // written by the app itself, so reloading the page always starts from the unchanged apartment.
       var m = /[#&]v=([0-9x.\-]+)/.exec(location.hash);
       var shared = m && K.decode(m[1]);
       if (shared) this.state.choice = shared;
+      if (m) { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* file:// */ } }
 
       var self = this;
       var start = function () { self.applyAll(); };
       if (this.el.hasLoaded) start();
       else this.el.addEventListener('loaded', start, { once: true });
+
+      // the highlighted room button follows the visitor; the panel keeps up when the furniture changes
+      this.el.addEventListener('room-changed', function () { if (self.state.mode !== 'intro') self.renderPanel(); });
 
       this.renderPanel();
       this.setCaption('', 'info');
@@ -293,7 +297,6 @@
       this.updateHighlights();
       this.renderPanel();
       this.el.emit('choice-changed');
-      try { history.replaceState(null, '', '#v=' + K.encode(this.state.choice)); } catch (e) { /* file:// */ }
     },
 
     // ---- actions ----
@@ -382,11 +385,14 @@
       if (mode === 'evening') {
         set('#l-ambient', 'light', { color: '#ffd9b8', intensity: 0.5 });
         set('#l-sun', 'light', { color: '#ffb877', intensity: 0.08 });
-        set('#l-bulb', 'light', { color: '#ffc880', intensity: 1.7 });
       } else {
         set('#l-ambient', 'light', { color: '#ffffff', intensity: 1.1 });
         set('#l-sun', 'light', { color: '#fff6e0', intensity: 0.8 });
-        set('#l-bulb', 'light', { color: '#fff2cf', intensity: 0.9 });
+      }
+      // every room has its own ceiling light (class room-light, made by apartment.js)
+      var lamps = document.querySelectorAll('.room-light');
+      for (var i = 0; i < lamps.length; i++) {
+        lamps[i].setAttribute('light', mode === 'evening' ? { color: '#ffc880', intensity: 1.7 } : { color: '#fff2cf', intensity: 0.9 });
       }
       this.applyWindow();
       this.renderPanel();
@@ -395,10 +401,10 @@
       return msg;
     },
 
-    // Tell the window which view to show and in which light (see js/windowview.js).
+    // Tell every window which view to show and in which light (see js/windowview.js).
     applyWindow: function () {
-      var w = document.querySelector('#window-group');
-      if (w) w.setAttribute('window-view', { view: this.state.view, light: this.state.light });
+      var list = document.querySelectorAll('[window-view]');
+      for (var i = 0; i < list.length; i++) list[i].setAttribute('window-view', { view: this.state.view, light: this.state.light });
     },
 
     setView: function (view, source) {
@@ -417,6 +423,82 @@
     nextView: function () {
       var list = ['city', 'sea', 'garden'];
       return list[(list.indexOf(this.state.view) + 1) % list.length];
+    },
+
+    // ---- walking and furniture ----
+    // Walk to a room (the only jump in the app: the visitor asks for it with a button or with the voice).
+    goTo: function (roomId, source) {
+      if (this.state.mode === 'intro') return null;
+      var P = window.Plan, room = P && P.room(roomId);
+      var rig = document.querySelector('#rig');
+      var mover = rig && rig.components && rig.components['rig-move'];
+      if (!room || !mover) return null;
+      mover.goTo(roomId);
+      this.log('goto', source, roomId);
+      var msg = 'Room: ' + room.name;
+      if (source !== 'voice') this.setCaption(msg, 'info');
+      return msg;
+    },
+
+    // "Furniture: on / off" for the whole apartment
+    setFurniture: function (on, source) {
+      if (this.state.mode === 'intro') return null;
+      Kit.Furniture.setEnabled(on);
+      this.log('furniture', source, on ? 'on' : 'off');
+      var msg = on ? 'Furniture: on' : 'Furniture: off (empty apartment)';
+      if (source !== 'voice') this.setCaption(msg, 'info');
+      this.renderPanel();
+      return msg;
+    },
+
+    // Remove mode: the visitor clicks a piece of furniture and it disappears.
+    setRemoveMode: function (on, source) {
+      if (this.state.mode === 'intro') return null;
+      if (on && !Kit.Furniture.enabled) Kit.Furniture.setEnabled(true);
+      Kit.Furniture.setRemoveMode(on);
+      this.log('remove_mode', source, on ? 'on' : 'off');
+      var msg = on ? 'Remove mode: click a piece of furniture to remove it' : 'Remove mode: off';
+      if (source !== 'voice') this.setCaption(msg, 'info', 7000);
+      this.renderPanel();
+      return msg;
+    },
+
+    // By name ("sofa"): the pieces in the room where the visitor stands first.
+    removeItems: function (text, source) {
+      if (this.state.mode === 'intro') return null;
+      var F = Kit.Furniture;
+      var hits = F.find(text, AVR.room, false);
+      if (!hits.length) return null;
+      hits.forEach(function (r) { F.remove(r, source); });
+      this.log('remove_item', source, hits.map(function (r) { return r.label; }).join(','));
+      var msg = 'Removed: ' + hits.map(function (r) { return r.label.toLowerCase(); }).join(', ');
+      if (source !== 'voice') this.setCaption(msg, 'ok');
+      this.renderPanel();
+      return msg;
+    },
+
+    restoreItems: function (text, source) {
+      if (this.state.mode === 'intro') return null;
+      var F = Kit.Furniture;
+      var hits = F.find(text, AVR.room, true);
+      if (!hits.length) return null;
+      hits.forEach(function (r) { F.restore(r); });
+      this.log('restore_item', source, hits.map(function (r) { return r.label; }).join(','));
+      var msg = 'Back in place: ' + hits.map(function (r) { return r.label.toLowerCase(); }).join(', ');
+      if (source !== 'voice') this.setCaption(msg, 'ok');
+      this.renderPanel();
+      return msg;
+    },
+
+    restoreAllFurniture: function (source) {
+      if (this.state.mode === 'intro') return null;
+      Kit.Furniture.setEnabled(true);
+      var n = Kit.Furniture.restoreAll();
+      this.log('restore_all', source, String(n));
+      var msg = n ? 'All furniture is back in place' : 'Furniture: on';
+      if (source !== 'voice') this.setCaption(msg, 'ok');
+      this.renderPanel();
+      return msg;
     },
 
     showSummary: function (source) {
@@ -483,6 +565,10 @@
       else if (action === 'preview') msg = this.setPreview(!this.state.preview, source);
       else if (action === 'light') msg = this.setLight(this.state.light === 'day' ? 'evening' : 'day', source);
       else if (action === 'view') msg = this.setView(this.nextView(), source);
+      else if (action === 'goto') msg = this.goTo(arg, source);
+      else if (action === 'furniture') msg = this.setFurniture(!Kit.Furniture.enabled, source);
+      else if (action === 'remove-mode') msg = this.setRemoveMode(!Kit.Furniture.removeMode, source);
+      else if (action === 'restore-all') msg = this.restoreAllFurniture(source);
       else if (action === 'summary') msg = this.showSummary(source);
       else if (action === 'room') msg = this.showRoom(source);
       else if (action === 'reset') msg = this.reset(source);
@@ -513,6 +599,11 @@
         else if (a.type === 'view-city') msg = self.setView('city', 'voice');
         else if (a.type === 'view-sea') msg = self.setView('sea', 'voice');
         else if (a.type === 'view-garden') msg = self.setView('garden', 'voice');
+        else if (a.type === 'goto') msg = self.goTo(a.room, 'voice');
+        else if (a.type === 'furniture-on') msg = self.restoreAllFurniture('voice');
+        else if (a.type === 'furniture-off') msg = self.setFurniture(false, 'voice');
+        else if (a.type === 'remove-item') msg = self.removeItems(a.text, 'voice');
+        else if (a.type === 'restore-item') msg = self.restoreItems(a.text, 'voice');
         else if (a.type === 'summary') msg = self.showSummary('voice');
         else if (a.type === 'room') msg = self.showRoom('voice');
         else if (a.type === 'reset') msg = self.reset('voice');
@@ -541,14 +632,30 @@
       };
     },
 
+    // Base textures are made once per material and colour and shared by every surface (see surface.setLook).
     textureFor: function (key, hex) {
       var info = Textures.info(key);
       if (!info) return null;
       try {
-        return {
-          canvas: Textures.colourCanvas(key, hex), bump: Textures.bumpCanvas(key),
-          tileW: info.tileW, tileH: info.tileH, bumpScale: info.bumpScale
-        };
+        var cache = this.texCache || (this.texCache = {});
+        var bumps = this.bumpTex || (this.bumpTex = {});
+        var id = key + '|' + hex;
+        var entry = cache[id];
+        if (!entry) {
+          var prepare = function (canvas, colour) {
+            var t = new THREE.CanvasTexture(canvas);
+            if (colour) t.colorSpace = THREE.SRGBColorSpace;
+            t.wrapS = t.wrapT = THREE.RepeatWrapping;
+            t.anisotropy = 8;
+            return t;
+          };
+          if (!bumps[key]) bumps[key] = prepare(Textures.bumpCanvas(key), false);
+          entry = cache[id] = { map: prepare(Textures.colourCanvas(key, hex), true), bump: bumps[key] };
+          var ids = this.texOrder || (this.texOrder = []);
+          ids.push(id);
+          if (ids.length > 24) { var old = ids.shift(); cache[old].map.dispose(); delete cache[old]; }
+        }
+        return { map: entry.map, bump: entry.bump, tileW: info.tileW, tileH: info.tileH, bumpScale: info.bumpScale };
       } catch (e) {
         console.warn('texture failed', key, e);
         return null;
@@ -633,6 +740,34 @@
           h: 0.085,
           items: [full(info.total ? 'Finishing cost: ' + K.fmt(info.total) + ' ₸  (demo prices)' : 'Finishing cost: choose materials',
             { bg: '#1f3a2f', color: '#c6f6d5', fs: 0.036 })]
+        });
+
+        // Rooms: walk to one of the five rooms (W A S D also works)
+        var rooms = window.Plan.ROOMS;
+        rows.push({
+          h: 0.075,
+          items: equal(rooms.length, function (i) {
+            var rm = rooms[i], on = AVR.room === rm.id;
+            return {
+              text: rm.name.replace(' room', ''), bg: on ? BLUE : DARK, fs: 0.026,
+              ui: { action: 'goto', arg: rm.id, hint: 'Walk to the ' + rm.name.toLowerCase() }
+            };
+          })
+        });
+        // Furniture: on / off, remove a piece by clicking it, bring everything back
+        var F = Kit.Furniture;
+        rows.push({
+          h: 0.075,
+          items: equal(3, function (i) {
+            if (i === 0) return { text: 'Furniture: ' + (F.enabled ? 'on' : 'off'), bg: DARK, fs: 0.026, ui: { action: 'furniture', hint: 'Show or hide all the furniture' } };
+            if (i === 1) {
+              return {
+                text: F.removeMode ? 'Click a piece…' : 'Remove a piece', bg: F.removeMode ? '#975a16' : DARK, fs: 0.026,
+                ui: { action: 'remove-mode', hint: 'Then click or look at a piece of furniture to remove it. Voice: "remove the sofa"' }
+              };
+            }
+            return { text: 'Restore all', bg: DARK, fs: 0.026, ui: { action: 'restore-all', hint: 'Bring all removed furniture back' } };
+          })
         });
 
         // Ready-made designs

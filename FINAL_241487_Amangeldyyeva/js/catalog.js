@@ -208,13 +208,13 @@
     door: { label: 'Temporary construction door', hex: '#7a5230', tex: null }
   };
 
-  // Room geometry (metres) used for the price. Room 5 x 4 x 2.7 m, one window, one door.
-  //   all walls   = 2*(5+4)*2.7 = 48.6;  window 1.2*1.1 = 1.32;  door 0.9*2.1 = 1.89
-  //   accent wall = far wall 5*2.7 = 13.5 minus the window = 12.18
-  //   walls       = all walls minus window, door and accent wall
-  //   skirting    = perimeter 18 minus the door 0.9 = 17.1 m
-  //   door        = leaf 0.9 x 2.1 = 1.89 m2
-  var AREAS = { walls: 33.21, accent: 12.18, floor: 20, ceiling: 20, skirting: 17.1, door: 1.89 };
+  // Quantities (m², m) used for the price. They are calculated from the floor plan of the whole apartment
+  // (js/plan.js: five rooms, 2.7 m high): wall pieces minus door openings and windows, accent walls (the
+  // feature wall of the living room and the bed wall of the bedroom), floors and ceilings of the rooms,
+  // skirting along the walls, and the three interior doors. The bathroom is tiled and is not part of the
+  // finishes, but its ceiling follows the ceiling finish.
+  var Plan = root.Plan || (typeof require === 'function' ? require('./plan.js') : null);
+  var AREAS = Plan.areas();
   var UNITS = { walls: 'm²', accent: 'm²', floor: 'm²', ceiling: 'm²', skirting: 'm', door: 'm²' };
 
   // ---------------------------------------------------------------------------
