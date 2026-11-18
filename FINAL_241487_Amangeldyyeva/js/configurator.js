@@ -20,6 +20,19 @@
   var Kit = window.Kit;
   var AVR = (window.AVR = window.AVR || {});
 
+  // Raycasts must not hit anything that is hidden. Three.js (and so A-Frame) ignores `visible` when it casts a
+  // ray, so on a desktop screen, where the floating 3D panel is hidden because the HTML drawer replaces it, the
+  // gaze ring in the centre of the screen could still "look at" an invisible panel button and click it after
+  // 1.2 s. That silently changed the design. This patch makes a mesh ignore rays when it or a parent is hidden.
+  if (!THREE.Mesh.prototype.raycastIgnoresHidden) {
+    var meshRaycast = THREE.Mesh.prototype.raycast;
+    THREE.Mesh.prototype.raycast = function (raycaster, intersects) {
+      for (var o = this; o; o = o.parent) if (o.visible === false) return;
+      meshRaycast.call(this, raycaster, intersects);
+    };
+    THREE.Mesh.prototype.raycastIgnoresHidden = true;
+  }
+
   // Which input caused a click? (used in the log)
   function sourceOf(evt) {
     var cursor = evt && evt.detail && evt.detail.cursorEl;

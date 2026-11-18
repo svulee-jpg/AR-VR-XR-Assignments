@@ -1,7 +1,7 @@
 /*
  * voice.js
  * AI-driven feature: speech recognition with the browser's Web Speech API
- * (SpeechRecognition, Russian, ru-RU). In Chrome the audio is sent to Google's
+ * (SpeechRecognition, English, en-US). In Chrome the audio is sent to Google's
  * speech service while recognition is on; the app itself stores no audio.
  *
  * The module never throws: every failure becomes a status that the app shows as
