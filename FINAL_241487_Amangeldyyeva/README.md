@@ -26,7 +26,7 @@ project is not affiliated with any company, uses no company branding, and all **
 ## Target device and how to run
 
 - **Target device:** desktop Chrome with the **Immersive Web Emulator** (Meta Quest profile); the specification accepts an emulator as a VR target. The page also runs in the Quest browser (voice is usually not available there; the buttons are).
-- **Live URL:** *(add after deployment to GitHub Pages)*
+- **Live URL:** https://svulee-jpg.github.io/AR-VR-XR-Assignments/FINAL_241487_Amangeldyyeva/ (GitHub Pages, branch `main`)
 
 Run from a fresh clone (needs Python 3; A-Frame is stored in `vendor/`, so the page opens without a CDN. Voice recognition still needs an internet connection):
 
