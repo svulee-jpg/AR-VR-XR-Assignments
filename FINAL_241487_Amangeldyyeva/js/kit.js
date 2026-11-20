@@ -79,6 +79,39 @@
     return out;
   }
 
+  // A box with softly rounded edges. Real furniture never has razor-sharp edges, and the thin highlight
+  // along a rounded edge is one of the strongest cues that tells the eye "real object", not "game block".
+  // Built from a 3 x 3 x 3 box: the outer ring of vertices is moved onto a 45-degree bevel of radius r and
+  // gets smooth normals; the texture coordinates are the same as THREE.BoxGeometry, so textures still fit.
+  var FACE_UV = [ // per face (px, nx, py, ny, pz, nz): [u axis, u sign, v axis, v sign], u = 0.5 + sign * pos / size
+    [2, -1, 1, 1], [2, 1, 1, 1], [0, 1, 2, -1], [0, 1, 2, 1], [0, 1, 1, 1], [0, -1, 1, 1]
+  ];
+  function roundedBox(w, h, d, r) {
+    var size = [w, h, d];
+    r = Math.min(r, w / 2, h / 2, d / 2) * 0.999;
+    if (r < 0.003) return new T.BoxGeometry(w, h, d);
+    var g = new T.BoxGeometry(1, 1, 1, 3, 3, 3);
+    var pos = g.attributes.position, nor = g.attributes.normal, uv = g.attributes.uv;
+    var per = pos.count / 6, n = new T.Vector3(), out = [0, 0, 0], k, i;
+    for (i = 0; i < pos.count; i++) {
+      var p = [pos.getX(i), pos.getY(i), pos.getZ(i)];
+      n.set(p[0] - Math.sign(p[0]) / 6, p[1] - Math.sign(p[1]) / 6, p[2] - Math.sign(p[2]) / 6).normalize();
+      var nn = [n.x, n.y, n.z];
+      for (k = 0; k < 3; k++) out[k] = Math.sign(p[k]) * (size[k] / 2 - r) + nn[k] * r;
+      pos.setXYZ(i, out[0], out[1], out[2]);
+      nor.setXYZ(i, n.x, n.y, n.z);
+      var f = FACE_UV[Math.floor(i / per)];
+      uv.setXY(i, 0.5 + f[1] * out[f[0]] / size[f[0]], 0.5 + f[3] * out[f[2]] / size[f[2]]);
+    }
+    return g;
+  }
+  // edge radius for a box of this size: about 1 cm, less for thin boards
+  function edgeRadius(w, h, d) {
+    var m = Math.min(w, h, d);
+    if (m < 0.012) return 0;
+    return Math.min(0.012, m * 0.2);
+  }
+
   // ---------------------------------------------------------------------------
   // Item: one piece of furniture
   // ---------------------------------------------------------------------------
@@ -95,7 +128,7 @@
     return this;
   };
   Item.prototype.box = function (w, h, d, m, x, y, z, rx, ry, rz) {
-    return this.add(new T.BoxGeometry(w, h, d), m, x, y, z, rx, ry, rz);
+    return this.add(roundedBox(w, h, d, edgeRadius(w, h, d)), m, x, y, z, rx, ry, rz);
   };
   Item.prototype.cyl = function (rt, rb, h, m, x, y, z, rx, ry, rz, seg) {
     return this.add(new T.CylinderGeometry(rt, rb, h, seg || 20), m, x, y, z, rx, ry, rz);
@@ -309,5 +342,5 @@
     hideOutline: function () { if (this.outline) this.outline.visible = false; }
   };
 
-  window.Kit = { rng: rng, tex: tex, mat: mat, Item: Item, merge: merge, place: place, Furniture: Furniture };
+  window.Kit = { rng: rng, tex: tex, mat: mat, Item: Item, merge: merge, place: place, roundedBox: roundedBox, Furniture: Furniture };
 })();

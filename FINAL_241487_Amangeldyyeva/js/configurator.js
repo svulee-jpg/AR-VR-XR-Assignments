@@ -395,17 +395,19 @@
         var el = document.querySelector(id);
         if (el) el.setAttribute(attr, value);
       };
+      // Daylight comes mostly from the HDR environment (js/realism.js); in the evening the warm ceiling lamps take over.
       if (mode === 'evening') {
-        set('#l-ambient', 'light', { color: '#ffd9b8', intensity: 0.5 });
-        set('#l-sun', 'light', { color: '#ffb877', intensity: 0.08 });
+        set('#l-ambient', 'light', { color: '#ffd9b8', intensity: 0.18 });
+        set('#l-sun', 'light', { color: '#ffb877', intensity: 0.05 });
       } else {
-        set('#l-ambient', 'light', { color: '#ffffff', intensity: 1.1 });
-        set('#l-sun', 'light', { color: '#fff6e0', intensity: 0.8 });
+        set('#l-ambient', 'light', { color: '#ffffff', intensity: 0.35 });
+        set('#l-sun', 'light', { color: '#fff4e2', intensity: 1.6 });
       }
+      if (window.AVR && AVR.realism) AVR.realism.setMode(mode);
       // every room has its own ceiling light (class room-light, made by apartment.js)
       var lamps = document.querySelectorAll('.room-light');
       for (var i = 0; i < lamps.length; i++) {
-        lamps[i].setAttribute('light', mode === 'evening' ? { color: '#ffc880', intensity: 1.7 } : { color: '#fff2cf', intensity: 0.9 });
+        lamps[i].setAttribute('light', mode === 'evening' ? { color: '#ffc27a', intensity: 2.2 } : { color: '#fff2cf', intensity: 0.35 });
       }
       this.applyWindow();
       this.renderPanel();

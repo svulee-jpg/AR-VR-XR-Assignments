@@ -23,6 +23,7 @@
   <script src="js/livingset.js"></script>
   <script src="js/rooms.js"></script>
   <script src="js/windowview.js"></script>
+  <script src="js/realism.js"></script>
   <script src="js/shop.js"></script>
   <script src="js/drawer.js"></script>
   <script src="js/compare.js"></script>
@@ -251,10 +252,12 @@
 
   <a-scene
     configurator fps-meter
+    realism="env: img/env/apartment-512.hdr"
+    shadow="type: pcf; autoUpdate: false"
     cursor="rayOrigin: mouse"
     raycaster="objects: .interactive; far: 12"
     background="color: #15171c"
-    renderer="antialias: true; toneMapping: ACESFilmic; exposure: 1.15"
+    renderer="antialias: true; toneMapping: neutral; exposure: 1.0; maxCanvasWidth: 2560; maxCanvasHeight: 1600"
     loading-screen="dotsColor: #ffffff; backgroundColor: #15171c">
 
     <a-assets timeout="20000">
@@ -293,8 +296,16 @@
     </a-entity>
 
     <!-- ======================= Lights ======================= -->
-    <a-entity id="l-ambient" light="type: hemisphere; color: #ffffff; groundColor: #c9b79a; intensity: 1.15"></a-entity>
-    <a-entity id="l-sun" light="type: directional; color: #fff6e0; intensity: 0.8" position="1 3 1"></a-entity>
+    <!-- Most of the daylight comes from the HDR photo of a real apartment (js/realism.js, image-based lighting).
+         The hemisphere light only lifts the shadows a little. The "sun" is the one light that casts soft shadows:
+         it shines almost straight down over the whole flat (its shadow box covers all five rooms). -->
+    <a-entity id="l-ambient" light="type: hemisphere; color: #ffffff; groundColor: #b9a78c; intensity: 0.35"></a-entity>
+    <a-entity id="l-sun-target" position="2 0 0.5"></a-entity>
+    <a-entity id="l-sun" position="3.4 8 1.6"
+              light="type: directional; color: #fff4e2; intensity: 1.6; target: #l-sun-target;
+                     castShadow: true; shadowMapWidth: 2048; shadowMapHeight: 2048; shadowRadius: 5;
+                     shadowBias: -0.0004; shadowCameraLeft: -6.5; shadowCameraRight: 6.5; shadowCameraTop: 6.5;
+                     shadowCameraBottom: -6.5; shadowCameraNear: 1; shadowCameraFar: 16"></a-entity>
 
     <!-- ======================= The apartment: 5 rooms, generated from js/plan.js ======================= -->
     <!-- Hallway, living room, kitchen, bedroom and bathroom (2.7 m high). js/apartment.js builds the walls with their

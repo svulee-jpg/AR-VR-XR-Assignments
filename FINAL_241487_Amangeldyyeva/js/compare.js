@@ -28,10 +28,13 @@
       hide.forEach(function (e) { e.object3D.visible = false; });
       // after = the current variant
       c.state.preview = false; c.applyAll();
+      if (furniture) furniture.object3D.visible = true;
+      if (AVR.realism) AVR.realism.shadowsDirty();
       after = snapshot();
       // before = rough apartment, without furniture
       c.state.preview = true; c.applyAll();
       if (furniture) furniture.object3D.visible = false;
+      if (AVR.realism) AVR.realism.shadowsDirty(); // the furniture shadows go with the furniture
       before = snapshot();
     } catch (e) {
       console.warn('compare failed', e);
@@ -39,6 +42,7 @@
       c.state.preview = oldPreview; c.applyAll();
       hide.forEach(function (e, i) { e.object3D.visible = oldVis[i]; });
       if (furniture) furniture.object3D.visible = oldFurn;
+      if (AVR.realism) AVR.realism.shadowsDirty();
     }
     if (!after || !before) return;
     c.log('compare_open', 'topbar', '');

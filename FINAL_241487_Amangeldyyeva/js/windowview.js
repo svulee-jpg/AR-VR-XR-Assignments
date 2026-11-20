@@ -328,6 +328,8 @@
   }
 
   var DRAW = { city: drawCity, sea: drawSea, garden: drawGarden };
+  var WINDOW_LIGHT = 7; // intensity of the daylight through one window (candela, physical light units)
+  var PHOTOS = {}; // key -> texture (loaded), null (loading) or false (failed)
 
   function makeCanvas(view, light) {
     var c = document.createElement('canvas');
@@ -481,6 +483,14 @@
         group.add(m);
       });
 
+      // Daylight that comes in through the window: a wide, soft spot light aimed into the room and slightly down,
+      // so the room is brighter near the window and darker further away, as in a real flat. Off in the evening.
+      this.sun = new T.SpotLight(0xfff3e3, 0, 8, Math.PI * 0.42, 1, 2);
+      this.sun.position.set(0, 2.0, 0.25);
+      this.sun.target.position.set(0, 0.2, 3.2);
+      group.add(this.sun);
+      group.add(this.sun.target);
+
       this.el.setObject3D('window-view', group);
       this.apply();
     },
@@ -490,14 +500,38 @@
     },
 
     // Choose the texture for the current view and light (drawn once, then reused).
+    // The pictures are photographs (img/views/<view>-<light>.jpg, cut from CC0 Poly Haven panoramas, see
+    // ASSETS.md). They are loaded once and shared by all windows; the drawn picture is shown until the photo
+    // has arrived, and stays if the photo cannot be loaded.
     apply: function () {
       var view = VIEWS.indexOf(this.data.view) >= 0 ? this.data.view : 'city';
       var light = this.data.light === 'evening' ? 'evening' : 'day';
       var key = view + '-' + light;
-      if (!this.cache[key]) this.cache[key] = srgb(new T.CanvasTexture(makeCanvas(view, light)));
-      this.tex = this.cache[key];
-      this.viewMat.map = this.tex;
-      this.viewMat.needsUpdate = true;
+      var self = this;
+      var photo = PHOTOS[key];
+      if (photo === undefined) {
+        PHOTOS[key] = null; // loading
+        new T.TextureLoader().load('img/views/' + key + '.jpg', function (t) {
+          srgb(t);
+          t.anisotropy = 4;
+          PHOTOS[key] = t;
+          var all = document.querySelectorAll('[window-view]');
+          for (var i = 0; i < all.length; i++) if (all[i].components['window-view']) all[i].components['window-view'].apply();
+        }, undefined, function () { PHOTOS[key] = false; });
+      }
+      if (photo) { // own copy per window: the parallax offset differs (the picture itself is shared)
+        if (!this.cache['photo-' + key]) this.cache['photo-' + key] = photo.clone();
+        this.tex = this.cache['photo-' + key];
+      }
+      else {
+        if (!this.cache[key]) this.cache[key] = srgb(new T.CanvasTexture(makeCanvas(view, light)));
+        this.tex = this.cache[key];
+      }
+      if (this.sun) this.sun.intensity = light === 'evening' ? 0 : WINDOW_LIGHT;
+      if (this.viewMat.map !== this.tex) {
+        this.viewMat.map = this.tex;
+        this.viewMat.needsUpdate = true;
+      }
     },
 
     // Parallax: the picture slides against the frame when the head moves, as a real view would.

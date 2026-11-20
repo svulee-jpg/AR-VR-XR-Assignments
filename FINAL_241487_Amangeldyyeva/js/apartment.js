@@ -149,7 +149,7 @@
         // one ceiling light per room (its position is in the plan); the evening/day switch changes it
         ent('a-entity', {
           id: 'l-' + r.id, class: 'room-light',
-          light: 'type: point; color: #fff2cf; intensity: 0.9; distance: 6; decay: 1',
+          light: 'type: point; color: #fff2cf; intensity: 0.35; distance: 6; decay: 1',
           position: r.lamp[0] + ' ' + r.lamp[1] + ' ' + r.lamp[2]
         }, el);
       });
