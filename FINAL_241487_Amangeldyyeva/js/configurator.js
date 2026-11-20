@@ -407,7 +407,9 @@
       // every room has its own ceiling light (class room-light, made by apartment.js)
       var lamps = document.querySelectorAll('.room-light');
       for (var i = 0; i < lamps.length; i++) {
-        lamps[i].setAttribute('light', mode === 'evening' ? { color: '#ffc27a', intensity: 2.2 } : { color: '#fff2cf', intensity: 0.35 });
+        lamps[i].setAttribute('light', mode === 'evening' ? { color: '#ffc27a', intensity: 2.2 } : { color: '#fff2cf', intensity: 0.5 });
+        // daytime: lamps are off where a window lights the room (see js/apartment.js)
+        lamps[i].setAttribute('visible', mode === 'evening' || !lamps[i].classList.contains('has-window'));
       }
       this.applyWindow();
       this.renderPanel();

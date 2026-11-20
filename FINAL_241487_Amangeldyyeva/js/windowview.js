@@ -527,7 +527,7 @@
         if (!this.cache[key]) this.cache[key] = srgb(new T.CanvasTexture(makeCanvas(view, light)));
         this.tex = this.cache[key];
       }
-      if (this.sun) this.sun.intensity = light === 'evening' ? 0 : WINDOW_LIGHT;
+      if (this.sun) { this.sun.intensity = WINDOW_LIGHT; this.sun.visible = light !== 'evening'; } // no daylight at night
       if (this.viewMat.map !== this.tex) {
         this.viewMat.map = this.tex;
         this.viewMat.needsUpdate = true;

@@ -146,10 +146,14 @@
           width: w, height: d, position: cx + ' ' + H + ' ' + cz, rotation: '90 0 0'
         }, el);
 
-        // one ceiling light per room (its position is in the plan); the evening/day switch changes it
+        // one ceiling light per room (its position is in the plan); the evening/day switch changes it.
+        // In daylight the lamp is off in a room with a window (the light comes from the window, js/windowview.js)
+        // and on in a room without one (hallway, bathroom), as in a real flat; fewer lights also keep VR fast.
+        var hasWindow = P.WINDOWS.some(function (w) { return w.room === r.id; });
         ent('a-entity', {
-          id: 'l-' + r.id, class: 'room-light',
-          light: 'type: point; color: #fff2cf; intensity: 0.35; distance: 6; decay: 1',
+          id: 'l-' + r.id, class: 'room-light' + (hasWindow ? ' has-window' : ''),
+          light: 'type: point; color: #fff2cf; intensity: 0.5; distance: 6; decay: 1',
+          visible: hasWindow ? 'false' : 'true',
           position: r.lamp[0] + ' ' + r.lamp[1] + ' ' + r.lamp[2]
         }, el);
       });

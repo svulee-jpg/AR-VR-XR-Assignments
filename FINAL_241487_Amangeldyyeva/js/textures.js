@@ -306,7 +306,14 @@
             var lh = rowH / lanes;
             var lshade = lanes > 1 ? 0.94 + grainR() * 0.12 : 1;
             if (lanes > 1) { ctx.fillStyle = css(c, lshade); ctx.fillRect(x, ly, plankW, lh); }
-            woodGrain(ctx, x, ly, plankW, lh, grainR, true, o.grain, 0.20);
+            // soft lengthwise colour bands (real boards are never one flat colour), then fine grain
+            for (var bnd = 0; bnd < 4; bnd++) {
+              var bh = lh * (0.15 + grainR() * 0.3), by = ly + grainR() * (lh - bh);
+              ctx.fillStyle = grainR() < 0.5 ? 'rgba(60,35,15,' + (0.03 + grainR() * 0.05).toFixed(3) + ')'
+                                             : 'rgba(255,245,225,' + (0.03 + grainR() * 0.05).toFixed(3) + ')';
+              ctx.fillRect(x, by, plankW, bh);
+            }
+            woodGrain(ctx, x, ly, plankW, lh, grainR, true, o.grain, 0.12);
             if (ln > 0) { ctx.fillStyle = 'rgba(0,0,0,0.18)'; ctx.fillRect(x, ly, plankW, 1); }
           }
           // joints (darker lines) and a light bevel edge
@@ -496,14 +503,14 @@
     microcement: { tileW: 1.2, tileH: 1.2, px: [512, 512], bump: 0.6, draw: function (c, W, H, hex) { drawCloudy(c, W, H, hex, 0.28); } },
     slats: { tileW: 0.405, tileH: 0.5, px: [405, 500], bump: 1.6, draw: drawSlats },
 
-    laminate: { tileW: 2.4, tileH: 1.14, px: [600, 285], bump: 0.7,
-      draw: function (c, W, H, hex) { drawPlanks(c, W, H, hex, { rows: 6, grain: 38, gap: 0.5, jitter: 0.12, seed: 5 }); } },
-    parquet: { tileW: 3.6, tileH: 1.14, px: [720, 228], bump: 0.7,
-      draw: function (c, W, H, hex) { drawPlanks(c, W, H, hex, { rows: 6, lanes: 3, grain: 12, gap: 0.3, jitter: 0.1, seed: 21 }); } },
-    engineered: { tileW: 3.8, tileH: 1.44, px: [760, 288], bump: 0.5,
-      draw: function (c, W, H, hex) { drawPlanks(c, W, H, hex, { rows: 6, grain: 46, gap: 0.2, jitter: 0.16, seed: 8 }); } },
-    spc: { tileW: 2.44, tileH: 1.08, px: [610, 270], bump: 0.4,
-      draw: function (c, W, H, hex) { drawPlanks(c, W, H, hex, { rows: 6, grain: 22, gap: 0.6, jitter: 0.08, seed: 14 }); } },
+    laminate: { tileW: 2.4, tileH: 1.14, px: [1200, 570], bump: 0.7,
+      draw: function (c, W, H, hex) { drawPlanks(c, W, H, hex, { rows: 6, grain: 70, gap: 0.45, jitter: 0.1, seed: 5 }); } },
+    parquet: { tileW: 3.6, tileH: 1.14, px: [1440, 456], bump: 0.7,
+      draw: function (c, W, H, hex) { drawPlanks(c, W, H, hex, { rows: 6, lanes: 3, grain: 22, gap: 0.3, jitter: 0.1, seed: 21 }); } },
+    engineered: { tileW: 3.8, tileH: 1.44, px: [1520, 576], bump: 0.5,
+      draw: function (c, W, H, hex) { drawPlanks(c, W, H, hex, { rows: 6, grain: 84, gap: 0.2, jitter: 0.14, seed: 8 }); } },
+    spc: { tileW: 2.44, tileH: 1.08, px: [1220, 540], bump: 0.4,
+      draw: function (c, W, H, hex) { drawPlanks(c, W, H, hex, { rows: 6, grain: 40, gap: 0.55, jitter: 0.08, seed: 14 }); } },
     herringbone: { tileW: 0.56, tileH: 0.56, px: [448, 448], bump: 0.7, draw: drawHerringbone },
     tile: { tileW: 1.2, tileH: 1.2, px: [480, 480], bump: 0.6, draw: drawTile },
     marble: { tileW: 1.6, tileH: 1.6, px: [512, 512], bump: 0.1, draw: drawMarble },

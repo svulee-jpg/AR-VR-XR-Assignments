@@ -20,6 +20,7 @@ presentation. It is updated as the work goes on.
 | Claude (Anthropic), Claude Sonnet 5.5 | Landing page in a quiet-luxury style with renders of the own room; arched steel window with curtains and marble sill and three code-drawn views (city, sea, garden) for day and evening (`js/windowview.js`), voice words "sea view", "city view", "garden view" and the View button | 18 Nov 2026 |
 | Claude (Anthropic), Claude Sonnet 5.5 | Showroom living room: new wide stripe wallpaper, "Living room" design, procedural furniture and decor (`js/livingset.js`) modelled on a reference photo; README and test updates | 13 and 18 Nov 2026 |
 | Claude (Anthropic), Claude Sonnet 5.5 | Five-room walkable apartment (floor plan, walls, doors, collision), furniture for kitchen, bedroom, hallway and bathroom, removable furniture (click and voice), room navigation (bar, panel, voice), realism pass (tone mapping, contact shadows), fix of the design changing by itself, new tests | 18 Nov 2026 |
+| Claude (Anthropic), Claude Opus 5.5 | Realism pass so the apartment looks like a real flat: image-based lighting from a CC0 HDR panorama, soft shadows, corner shading, fabric sheen (`js/realism.js`); photographic window views and daylight through the windows; rounded furniture edges; finer wood floor textures; neutral tone mapping; new landing pictures; `ASSETS.md` and `tools/make_realism_assets.py` | 20 Nov 2026 |
 
 ## What I did myself
 
