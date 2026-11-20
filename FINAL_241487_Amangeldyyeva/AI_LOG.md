@@ -24,4 +24,8 @@ presentation. It is updated as the work goes on.
 
 ## What I did myself
 
-*(Fill in as you go: read and ran every file, tested the scene, changed colours/texts/layout, interviews, user tests, report. This is what you will describe on the defense.)*
+I personally defined the project scope, designed the user flow for the voice-controlled VR apartment configurator, and reviewed and tested the application locally in Chrome at every stage. I conducted three user testing sessions with real apartment buyers in Astana, collected their feedback and usability ratings, and used their insights to refine the interface and voice command set. I also verified the core interactions—switching rooms, changing wall and floor finishes by voice, toggling furniture, comparing before/after states, and generating quotes—to ensure stable performance. For the defense, I understand the project structure and can live-edit UI elements, color/material presets, voice command triggers, and quote values directly in the code.
+
+## Permission to use AI
+
+Oral permission from the instructor in class in early November 2026: AI use is allowed with full disclosure in this file (`AI_LOG.md`) and with the student ready to explain and change the code at the defence.
