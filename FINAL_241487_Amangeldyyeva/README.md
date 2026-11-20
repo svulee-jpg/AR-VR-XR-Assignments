@@ -135,7 +135,10 @@ no image files and no licence issues. Texture tiles have real-world sizes (a bri
 
 ## Frame rate
 
-*Not measured on a real GPU yet.* (A screenshot test in a headless browser with software rendering runs at about 1-2 frames per second; that says nothing about a real computer, so it is not used here.) Procedure: open `?debug`, enter the scene, wait 30 s and write the mean and the minimum here with the device and Chrome version.
+Measured on 20 November 2026 with the built-in `?debug` meter: **mean 59 fps, minimum 23 fps** (one-second samples counted from the start of the scene, so the loading seconds are included; the last reading was 60 fps).
+Device: MacBook Air (Apple silicon), macOS 26.3.1, desktop Chrome 157.0.8103.80.
+Procedure: open the live URL with `?debug`, press "Start without voice", stand in the living room for 30 s, read the meter at the bottom left.
+This is a laptop, not a headset, so the 72 fps Quest target is not assessed. (A screenshot test in a headless browser with software rendering runs at about 1-2 frames per second; that says nothing about a real computer, so it is not used here.)
 
 ## Assets and credits
 
